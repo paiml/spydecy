@@ -968,7 +968,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy-c"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "clang-sys",
@@ -993,7 +993,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy-debugger"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "colored",
@@ -1007,7 +1007,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy-hir"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "codespan",
@@ -1031,7 +1031,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy-python"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "pretty_assertions",
