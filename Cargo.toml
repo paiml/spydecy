@@ -135,15 +135,15 @@ wildcard_imports = "warn"
 
 [package]
 name = "spydecy"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
 authors = ["Spydecy Team <team@spydecy.dev>"]
-license = "MIT OR Apache-2.0"
 description = "Self-hosted Python/C-to-Rust compiler-debugger with introspective debugging"
 repository = "https://github.com/noahgift/spydecy"
 keywords = ["transpiler", "python", "c", "rust", "compiler"]
 categories = ["compilers", "development-tools"]
-rust-version = "1.75.0"
 
 [dependencies]
 # Workspace crates

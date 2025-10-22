@@ -16,16 +16,14 @@
 //! ✅ Behavior matches Python len()
 
 use anyhow::Result;
-use spydecy_c::{hir_converter::convert_to_hir as c_to_hir, parse_c, parser::CAST};
+use spydecy_c::parse_c;
 use spydecy_hir::{
     c::CHIR,
     python::PythonHIR,
-    unified::{Unifier, UnifiedHIR},
+    unified::{UnifiedHIR, Unifier},
     Language,
 };
-use spydecy_python::{
-    hir_converter::convert_to_hir as python_to_hir, parse_python, parser::PythonAST,
-};
+use spydecy_python::parse_python;
 
 #[test]
 fn test_len_unification_end_to_end() -> Result<()> {
@@ -130,10 +128,7 @@ list_length(PyListObject *self) {
     // Verify boundary is marked as eliminated
     if let UnifiedHIR::Call { cross_mapping, .. } = optimized {
         let mapping = cross_mapping.expect("Mapping should exist");
-        assert!(
-            mapping.boundary_eliminated,
-            "Boundary should be eliminated"
-        );
+        assert!(mapping.boundary_eliminated, "Boundary should be eliminated");
         println!("✅ Python→C boundary eliminated");
     }
 
@@ -164,7 +159,10 @@ fn extract_len_call_from_module(hir: &PythonHIR) -> Result<PythonHIR> {
         .first()
         .ok_or_else(|| anyhow::anyhow!("Module body is empty"))?;
 
-    let PythonHIR::Function { body: func_body, .. } = function_hir else {
+    let PythonHIR::Function {
+        body: func_body, ..
+    } = function_hir
+    else {
         anyhow::bail!("Expected Function, got: {function_hir:?}");
     };
 
