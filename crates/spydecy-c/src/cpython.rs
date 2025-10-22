@@ -58,4 +58,12 @@ mod tests {
 
         assert_eq!(identify_pattern(&ast), Some(CPythonPattern::ListLength));
     }
+
+    #[test]
+    fn test_identify_pylist_append() {
+        let mut ast = CAST::new("FunctionDecl".to_string());
+        ast.name = Some("PyList_Append".to_string());
+
+        assert_eq!(identify_pattern(&ast), Some(CPythonPattern::ListAppend));
+    }
 }

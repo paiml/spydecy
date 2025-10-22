@@ -197,3 +197,149 @@ fn extract_list_length_from_translation_unit(hir: &CHIR) -> Result<CHIR> {
 
     Ok(function.clone())
 }
+
+#[test]
+fn test_append_unification_end_to_end() -> Result<()> {
+    // ═══════════════════════════════════════════════════════════
+    // Step 1: Create Python HIR for append() call
+    // ═══════════════════════════════════════════════════════════
+    println!("\n═══ Step 1: Create Python HIR for append() ═══");
+
+    // Create Python HIR directly (parser doesn't support Expr statements yet)
+    let python_hir = PythonHIR::Call {
+        id: spydecy_hir::NodeId::new(1),
+        callee: Box::new(PythonHIR::Variable {
+            id: spydecy_hir::NodeId::new(2),
+            name: "append".to_owned(),
+            inferred_type: None,
+            meta: spydecy_hir::metadata::Metadata::new(),
+        }),
+        args: vec![PythonHIR::Variable {
+            id: spydecy_hir::NodeId::new(3),
+            name: "item".to_owned(),
+            inferred_type: None,
+            meta: spydecy_hir::metadata::Metadata::new(),
+        }],
+        kwargs: vec![],
+        inferred_type: None,
+        meta: spydecy_hir::metadata::Metadata::new(),
+    };
+    println!("✅ Python HIR for append() created: {python_hir:#?}");
+
+    // ═══════════════════════════════════════════════════════════
+    // Step 2: Parse C source
+    // ═══════════════════════════════════════════════════════════
+    println!("\n═══ Step 2: Parse C Source (PyList_Append) ═══");
+
+    let c_source = r"
+int
+PyList_Append(PyObject *list, PyObject *item) {
+    return 0;
+}
+";
+
+    let c_translation_unit_hir = parse_c(c_source, "listobject.c")?;
+    println!("✅ C HIR parsed");
+
+    // Extract the C HIR for PyList_Append function
+    let c_hir = extract_pylist_append_from_translation_unit(&c_translation_unit_hir)?;
+    println!("✅ C HIR for PyList_Append() extracted: {c_hir:#?}");
+
+    // ═══════════════════════════════════════════════════════════
+    // Step 3: Unify Python + C HIR
+    // ═══════════════════════════════════════════════════════════
+    println!("\n═══ Step 3: Unify Python + C HIR ═══");
+
+    let mut unifier = Unifier::new();
+    let unified = unifier.unify(&python_hir, &c_hir)?;
+
+    println!("✅ Unification succeeded!");
+    println!("Unified HIR: {unified:#?}");
+
+    // ═══════════════════════════════════════════════════════════
+    // Step 4: Verify Result
+    // ═══════════════════════════════════════════════════════════
+    println!("\n═══ Step 4: Verify Result ═══");
+
+    // Verify it's a Call targeting Rust
+    let UnifiedHIR::Call {
+        target_language,
+        callee,
+        cross_mapping,
+        ..
+    } = unified.clone()
+    else {
+        panic!("Expected UnifiedHIR::Call, got: {unified:?}");
+    };
+
+    // ✅ Verify: Target language is Rust (not Python or C)
+    assert_eq!(
+        target_language,
+        Language::Rust,
+        "Target language should be Rust"
+    );
+    println!("✅ Target language: Rust");
+
+    // ✅ Verify: Callee is Vec::push (pure Rust, no FFI)
+    assert_eq!(callee, "Vec::push", "Should call Vec::push");
+    println!("✅ Callee: Vec::push (pure Rust)");
+
+    // ✅ Verify: Cross-language mapping exists
+    assert!(
+        cross_mapping.is_some(),
+        "Should have cross-language mapping"
+    );
+    println!("✅ Cross-language mapping exists");
+
+    // ✅ Verify: Pattern is AppendPattern
+    let mapping = cross_mapping.expect("Cross mapping should exist");
+    assert_eq!(
+        mapping.pattern,
+        spydecy_hir::unified::UnificationPattern::AppendPattern,
+        "Should be AppendPattern"
+    );
+    println!("✅ Pattern: AppendPattern");
+
+    // ═══════════════════════════════════════════════════════════
+    // Step 5: Eliminate Boundary
+    // ═══════════════════════════════════════════════════════════
+    println!("\n═══ Step 5: Eliminate Python→C Boundary ═══");
+
+    let optimized = unified.eliminate_boundary();
+
+    // Verify boundary is marked as eliminated
+    if let UnifiedHIR::Call { cross_mapping, .. } = optimized {
+        let mapping = cross_mapping.expect("Mapping should exist");
+        assert!(mapping.boundary_eliminated, "Boundary should be eliminated");
+        println!("✅ Python→C boundary eliminated");
+    }
+
+    println!("\n═══════════════════════════════════════════════════════════");
+    println!("🎉 SUCCESS! Append pattern validated end-to-end!");
+    println!("═══════════════════════════════════════════════════════════");
+    println!();
+    println!("Pipeline verified:");
+    println!("  Python lst.append(item) → PythonHIR");
+    println!("  C PyList_Append() → CHIR");
+    println!("  Python + C → UnifiedHIR (Rust Vec::push)");
+    println!("  Boundary eliminated → Pure Rust code");
+    println!();
+    println!("Second unification pattern working! ✅");
+
+    Ok(())
+}
+
+/// Extract the PyList_Append function from C TranslationUnit HIR
+fn extract_pylist_append_from_translation_unit(hir: &CHIR) -> Result<CHIR> {
+    // Extract the translation unit
+    let CHIR::TranslationUnit { declarations, .. } = hir else {
+        anyhow::bail!("Expected TranslationUnit, got: {hir:?}");
+    };
+
+    // Extract the first function (PyList_Append)
+    let function = declarations
+        .first()
+        .ok_or_else(|| anyhow::anyhow!("No declarations found"))?;
+
+    Ok(function.clone())
+}

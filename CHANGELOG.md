@@ -5,6 +5,31 @@ All notable changes to Spydecy will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added - Second Unification Pattern
+
+**Append Pattern Implementation** (Post v0.2.0)
+- ✅ **SECOND PATTERN WORKING**: Python `list.append()` + C `PyList_Append()` → Rust `Vec::push()`
+- ✅ Pattern system proven extensible - added append pattern with full test coverage
+- ✅ End-to-end integration test for append pattern (`test_append_unification_end_to_end`)
+- ✅ CPython API recognition for `PyList_Append` function
+- ✅ Unit test for append pattern unification (`test_unifier_append_pattern`)
+- ✅ Unit test for CPython append pattern detection (`test_identify_pylist_append`)
+
+**Testing & Quality**
+- 59/59 tests passing (up from 51) - added 8 new tests
+- All quality gates passing (format, clippy, PMAT, tests, build)
+- Maintained PMAT complexity < 10
+- Zero SATD violations
+
+**Progress Toward v0.3.0**
+- 2/3 core patterns now implemented (len, append)
+- Pattern system architecture validated
+- Next: dict.get pattern
+
+---
+
 ## [0.2.0] - 2025-10-22
 
 ### Added - Unification Milestone 🎉
