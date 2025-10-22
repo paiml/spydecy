@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Cross-Layer Optimizer (Sprint 4)! 🚀
+
+**Optimizer Implementation** (Post v0.2.0)
+- ✅ **OPTIMIZER WORKING**: Pass-based optimization architecture implemented
+- ✅ **Boundary Elimination Pass**: Core optimization that removes Python→C FFI boundaries
+- ✅ **Optimization Pipeline**: Orchestrates multiple optimization passes in sequence
+- ✅ `OptimizationPipeline::standard()` - Pre-configured pipeline with boundary elimination
+- ✅ `Pass` trait - Extensible architecture for adding new optimization passes
+- ✅ Complete integration tests demonstrating optimizer with all 3 core patterns
+
+**Testing & Quality**
+- 72/72 tests passing (up from 62) - added 10 new optimizer tests
+  - 5 new unit tests for optimizer (boundary elimination, pipeline)
+  - 5 new integration tests (one per pattern + full pipeline + multi-pass)
+  - All tests validate: Parse → Unify → Optimize pipeline
+- All quality gates passing (format, clippy, PMAT, tests, build)
+- Maintained PMAT complexity < 10
+- Zero SATD violations
+
+**Architecture**
+- Pass-based optimization system: `UnifiedHIR → Pass 1 → Pass 2 → Pass N → Optimized HIR`
+- `BoundaryEliminationPass` - Uses existing `eliminate_boundary()` from UnifiedHIR
+- `OptimizationPipeline` - Runs passes sequentially, tracks pass count
+- Future passes planned: Dead code elimination, inlining, constant folding
+
+**Sprint 4 Milestone Achieved**
+- ✅ Optimizer foundation complete
+- ✅ Boundary elimination working for all 3 patterns (len, append, dict.get)
+- ✅ Integration tests prove full pipeline: Parse → Unify → Optimize
+- ✅ Extensible architecture ready for additional passes
+
 ### Added - All 3 Core Unification Patterns Complete! 🎉
 
 **Third Pattern: Dict.Get Implementation** (Post v0.2.0)

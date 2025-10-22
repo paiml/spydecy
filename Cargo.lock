@@ -938,6 +938,7 @@ dependencies = [
  "spydecy-c",
  "spydecy-debugger",
  "spydecy-hir",
+ "spydecy-optimizer",
  "spydecy-python",
  "tempfile",
  "thiserror",
@@ -1026,6 +1027,7 @@ dependencies = [
  "anyhow",
  "proptest",
  "serde",
+ "spydecy-hir",
  "thiserror",
 ]
 
