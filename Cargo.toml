@@ -164,6 +164,11 @@ serde_json = "1.0"
 toml = "0.8"
 
 [dev-dependencies]
+# Workspace crates for integration tests
+spydecy-hir = { path = "crates/spydecy-hir" }
+spydecy-python = { path = "crates/spydecy-python" }
+spydecy-c = { path = "crates/spydecy-c" }
+
 # Property-based testing
 proptest = "1.5"
 proptest-derive = "0.5"
