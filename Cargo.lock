@@ -985,7 +985,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy-codegen"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "proptest",
@@ -1024,7 +1024,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy-optimizer"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "proptest",

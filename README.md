@@ -61,11 +61,17 @@ make quality-gate
 ### Usage
 
 ```bash
+# Compile Python + C to Rust (full pipeline)
+spydecy compile --python my_file.py --c my_file.c --output my_file.rs --verbose
+
+# Quick compile (non-verbose)
+spydecy compile --python my_file.py --c my_file.c --output my_file.rs
+
 # Visualize Python AST
 spydecy debug --visualize example.py
 
-# Show version
-spydecy --version
+# Show project info and status
+spydecy info
 
 # Get help
 spydecy --help

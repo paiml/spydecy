@@ -148,6 +148,11 @@ categories = ["compilers", "development-tools"]
 [dependencies]
 # Workspace crates
 spydecy-debugger = { version = "0.2.0", path = "crates/spydecy-debugger" }
+spydecy-hir = { version = "0.2.0", path = "crates/spydecy-hir" }
+spydecy-python = { version = "0.2.0", path = "crates/spydecy-python" }
+spydecy-c = { version = "0.2.0", path = "crates/spydecy-c" }
+spydecy-optimizer = { version = "0.2.0", path = "crates/spydecy-optimizer" }
+spydecy-codegen = { version = "0.2.0", path = "crates/spydecy-codegen" }
 
 # CLI framework
 clap = { version = "4.5", features = ["derive", "cargo"] }
