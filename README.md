@@ -5,7 +5,7 @@
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](https://opensource.org/licenses/MIT)
 [![Downloads](https://img.shields.io/crates/d/spydecy.svg)](https://crates.io/crates/spydecy)
 
-**Version 0.1.0 Released** 🎉 • **EXTREME TDD** • **Zero Tolerance SATD** • **50 Tests Passing**
+**Version 0.2.0 Released** 🎉 • **Unification Working!** • **EXTREME TDD** • **51 Tests Passing**
 
 Unified Python and C-to-Rust transpilation with introspective debugging capabilities.
 
@@ -13,10 +13,10 @@ Unified Python and C-to-Rust transpilation with introspective debugging capabili
 
 | Crate | Version | Description |
 |-------|---------|-------------|
-| [spydecy](https://crates.io/crates/spydecy) | 0.1.0 | Main CLI application |
-| [spydecy-hir](https://crates.io/crates/spydecy-hir) | 0.1.0 | Unified HIR (High-level IR) |
-| [spydecy-python](https://crates.io/crates/spydecy-python) | 0.1.0 | Python AST parser (PyO3) |
-| [spydecy-debugger](https://crates.io/crates/spydecy-debugger) | 0.1.0 | Introspective debugger |
+| [spydecy](https://crates.io/crates/spydecy) | 0.2.0 | Main CLI application |
+| [spydecy-hir](https://crates.io/crates/spydecy-hir) | 0.2.0 | Unified HIR (High-level IR) |
+| [spydecy-python](https://crates.io/crates/spydecy-python) | 0.2.0 | Python AST parser (PyO3) |
+| [spydecy-debugger](https://crates.io/crates/spydecy-debugger) | 0.2.0 | Introspective debugger |
 
 ## 🎯 Quick Start
 
@@ -138,35 +138,38 @@ make watch
 
 ## 🏗️ Project Status
 
-**Current Version**: v0.1.0 (Released 2025-10-22)
-**Current Phase**: Sprint 3 - C Transpiler Foundation
+**Current Version**: v0.2.0 (Released 2025-10-22)
+**Current Phase**: Sprint 3 Complete ✅ - Planning Sprint 4
 
 ### Completed Milestones ✅
 
 - ✅ **Sprint 0**: Tracer Bullet Validation - Core assumption proven: `len()` unification works!
-- ✅ **Sprint 2**: Python Transpiler - Full Python AST parsing with PyO3 (7/7 tests)
-- ✅ **v0.1.0 Release**: Published to crates.io with 50 passing tests
-  - spydecy-hir: Unified HIR foundation
-  - spydecy-python: Python parser working
-  - spydecy-debugger: Introspective debugger
-  - spydecy: Main CLI application
+- ✅ **Sprint 2**: Python Transpiler - Full Python AST parsing with PyO3 (36/36 tests)
+- ✅ **v0.1.0 Release**: Published to crates.io with initial foundation
+- ✅ **Sprint 3**: C Transpiler Foundation (51/51 tests)
+  - C parser complete using clang-sys
+  - CPython API pattern recognition working
+  - **CORE INNOVATION PROVEN**: Python + C → Rust unification end-to-end!
+- ✅ **v0.2.0 Release**: Unification Milestone 🎉
+  - Python `len(x)` + C `list_length()` → Rust `Vec::len()` working
+  - Complete pipeline validated with production parsers
+  - Boundary elimination demonstrated
 
-### In Progress 🚧
+### Next Steps 🚀
 
-- ⏳ **Sprint 3**: C Transpiler Foundation
-  - ✅ C parser complete (11/11 tests)
-  - ✅ CPython API pattern recognition
-  - ⏳ First unification tests (Python + C → Rust)
-  - ⏳ C debugger visualization
+- **Sprint 4**: Cross-Layer Optimization (Est. 2-4 weeks)
+  - Add more unification patterns (append, dict.get)
+  - Implement C debugger visualization
+  - Begin optimizer implementation
+  - Performance benchmarking
 
 ### Roadmap
 
-- **v0.2.0** (Est. 2 weeks): Complete unification - First Python + C → Rust tests working
-- **v0.3.0** (Est. 4 weeks): Cross-layer optimization - Boundary elimination
-- **v0.4.0** (Est. 8 weeks): Full code generation pipeline
-- **v1.0.0** (Est. 12 weeks): Production ready - Self-hosting capability
+- **v0.3.0** (Est. 4-6 weeks): Expanded patterns + optimizer
+- **v0.4.0** (Est. 8-10 weeks): Full code generation pipeline
+- **v1.0.0** (Est. 12-16 weeks): Production ready - Self-hosting capability
 
-See [RELEASE-v0.1.0.md](RELEASE-v0.1.0.md) for detailed release notes.
+See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
 
 ## 🔬 Architecture
 
@@ -238,10 +241,11 @@ Inspired by:
 
 **Built with EXTREME quality standards. Zero compromises. 🚀**
 
-**Status**: v0.1.0 Released to crates.io ✅
-**Current**: Sprint 3 - C Transpiler Foundation
-**Next**: v0.2.0 - First Python + C unification tests
+**Status**: v0.2.0 Released to crates.io ✅
+**Achievement**: 🎉 Core Innovation Proven End-to-End
+**Current**: Sprint 3 Complete - Planning Sprint 4
+**Next**: v0.3.0 - Expanded patterns + optimizer
 
 📦 **Install now**: `cargo install spydecy`
-📖 **Documentation**: [RELEASE-v0.1.0.md](RELEASE-v0.1.0.md)
+📖 **Documentation**: [CHANGELOG.md](CHANGELOG.md)
 🔗 **Crates.io**: https://crates.io/crates/spydecy
