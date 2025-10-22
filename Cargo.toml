@@ -9,6 +9,7 @@ members = [
     "crates/spydecy-debugger",
     "crates/spydecy-analyzers",
     "crates/spydecy-bootstrap",
+    "crates/spydecy-decy-bridge",
     "sprint0-tracer-bullet",
 ]
 exclude = ["fuzz", "examples/*/target"]

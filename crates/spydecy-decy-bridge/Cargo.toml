@@ -1,0 +1,37 @@
+[package]
+name = "spydecy-decy-bridge"
+version = "0.2.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors = ["Spydecy Team <team@spydecy.dev>"]
+description = "HIR bridge between Decy and Spydecy transpilers for cross-project integration"
+repository = "https://github.com/noahgift/spydecy"
+keywords = ["transpiler", "bridge", "hir", "integration", "decy"]
+categories = ["compilers", "development-tools"]
+
+[dependencies]
+# Spydecy HIR
+spydecy-hir = { version = "0.2.0", path = "../spydecy-hir" }
+
+# Decy HIR
+decy-hir = { version = "0.2.0", path = "../../../decy/crates/decy-hir" }
+decy-parser = { version = "0.2.0", path = "../../../decy/crates/decy-parser" }
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Logging
+tracing = "0.1"
+
+# Serialization for debugging
+serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]
+proptest = "1.5"
+pretty_assertions = "1.4"
+tempfile = "3.8"
+
+[lints]
+workspace = true
