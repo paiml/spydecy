@@ -234,6 +234,15 @@ Licensed under either of:
 
 at your option.
 
+## 🤝 Sister Projects
+
+**Spydecy** is part of a family of transpiler projects:
+
+- **[decy](https://github.com/paiml/decy)**: C-to-Rust transpiler with ownership inference
+  - ✅ **Already integrated**: decy uses spydecy-debugger for C AST visualization
+  - 🔄 **Integration planned**: See [DECY-INTEGRATION-PLAN.md](DECY-INTEGRATION-PLAN.md)
+  - **Opportunity**: Use decy's advanced C parser and ownership analysis in Spydecy
+
 ## 🙏 Acknowledgments
 
 Inspired by:
