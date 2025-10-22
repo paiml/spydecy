@@ -47,6 +47,8 @@ install-tools: ## Install all required development tools
 	cargo install cargo-llvm-cov cargo-mutants cargo-watch cargo-outdated cargo-audit
 	@echo "$(GREEN)Installing PMAT (if not installed)...$(NC)"
 	cargo install pmat || echo "$(YELLOW)PMAT installation failed - install manually$(NC)"
+	@echo "$(GREEN)Installing mdbook (if not installed)...$(NC)"
+	cargo install mdbook --vers "^0.4" --locked || echo "$(YELLOW)mdbook already installed$(NC)"
 	@echo "$(GREEN)✅ All tools installed!$(NC)"
 
 .PHONY: setup
@@ -71,7 +73,40 @@ build-release: ## Build optimized release binary
 clean: ## Clean build artifacts
 	@echo "$(BLUE)Cleaning build artifacts...$(NC)"
 	cargo clean
-	rm -rf coverage/ docs/reports/ .kaizen/
+	rm -rf coverage/ docs/reports/ .kaizen/ book/build/
+
+## Book Documentation
+
+.PHONY: book
+book: ## Build the documentation book
+	@echo "$(BLUE)Building documentation book...$(NC)"
+	@if ! command -v mdbook >/dev/null 2>&1; then \
+		echo "$(YELLOW)mdbook not found. Installing...$(NC)"; \
+		cargo install mdbook --vers "^0.4" --locked; \
+	fi
+	mdbook build book
+	@echo "$(GREEN)✅ Book built successfully!$(NC)"
+	@echo "$(BLUE)Open book/build/html/index.html to view$(NC)"
+
+.PHONY: book-test
+book-test: ## Test code examples in the book (TDD-enforced)
+	@echo "$(BLUE)Testing book code examples...$(NC)"
+	@if ! command -v mdbook >/dev/null 2>&1; then \
+		echo "$(YELLOW)mdbook not found. Installing...$(NC)"; \
+		cargo install mdbook --vers "^0.4" --locked; \
+	fi
+	mdbook test book
+	@echo "$(GREEN)✅ All book examples tested!$(NC)"
+
+.PHONY: book-serve
+book-serve: ## Serve the book locally for development
+	@echo "$(BLUE)Serving book at http://localhost:3000$(NC)"
+	mdbook serve book --open
+
+.PHONY: book-watch
+book-watch: ## Watch and rebuild book on changes
+	@echo "$(BLUE)Watching book for changes...$(NC)"
+	mdbook watch book
 
 ## Quality Gates
 
@@ -210,7 +245,7 @@ quality-fast: format-check lint test-fast ## Run fast quality checks (no coverag
 	@echo "$(GREEN)✅ Fast quality checks passed!$(NC)"
 
 .PHONY: pre-commit
-pre-commit: format lint test-fast pmat-check ## Pre-commit quality checks
+pre-commit: format lint test-fast pmat-check book-test ## Pre-commit quality checks
 	@echo "$(GREEN)✅ Pre-commit checks passed!$(NC)"
 
 ## Continuous Integration
