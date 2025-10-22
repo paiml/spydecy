@@ -1,0 +1,16 @@
+[package]
+name = "spydecy-codegen"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = "1.0"
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]
+proptest = "1.5"
+
+[lints]
+workspace = true

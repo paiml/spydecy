@@ -1,0 +1,21 @@
+[package]
+name = "sprint0-tracer-bullet"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+anyhow = "1.0"
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[dev-dependencies]
+pretty_assertions = "1.4"
+
+[lints]
+workspace = true
+
+[[test]]
+name = "e2e_tracer_bullet"
+path = "tests/e2e_tracer_bullet.rs"

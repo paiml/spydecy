@@ -1,0 +1,37 @@
+[package]
+name = "spydecy-c"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+# HIR dependency
+spydecy-hir = { path = "../spydecy-hir" }
+
+# C parsing via clang-sys (following decy's approach)
+clang-sys = { version = "1.7", features = ["clang_3_9"] }
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Logging
+tracing = "0.1"
+
+[dev-dependencies]
+proptest = "1.5"
+tempfile = "3.8"
+
+# Note: clang-sys requires unsafe for FFI bindings
+# We allow unsafe_code only in this crate for C parsing
+[lints.rust]
+unsafe_code = "allow"  # Required for clang-sys FFI
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }

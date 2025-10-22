@@ -1,0 +1,28 @@
+[package]
+name = "spydecy-debugger"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+# HIR and Python parser dependencies
+spydecy-hir = { path = "../spydecy-hir" }
+spydecy-python = { path = "../spydecy-python" }
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Serialization for output formats
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Terminal colors and formatting
+colored = "2.1"
+
+[dev-dependencies]
+tempfile = "3.8"
+
+[lints]
+workspace = true

@@ -1,0 +1,207 @@
+[workspace]
+members = [
+    ".",
+    "crates/spydecy-python",
+    "crates/spydecy-c",
+    "crates/spydecy-hir",
+    "crates/spydecy-optimizer",
+    "crates/spydecy-codegen",
+    "crates/spydecy-debugger",
+    "crates/spydecy-analyzers",
+    "crates/spydecy-bootstrap",
+    "sprint0-tracer-bullet",
+]
+exclude = ["fuzz", "examples/*/target"]
+resolver = "2"
+
+[workspace.lints.rust]
+unsafe_code = "warn"  # Minimize unsafe, track via quality gates
+missing_docs = "warn"
+dead_code = "deny"
+unused_imports = "deny"
+unused_variables = "deny"
+
+[workspace.lints.clippy]
+# Correctness (DENY - Must fix)
+correctness = { level = "deny", priority = -1 }
+suspicious = { level = "deny", priority = -1 }
+complexity = { level = "warn", priority = -1 }
+perf = { level = "warn", priority = -1 }
+style = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+
+# Specific lints for transpiler safety
+enum_glob_use = "deny"
+unimplemented = "deny"
+todo = "deny"  # ZERO TOLERANCE SATD
+dbg_macro = "deny"
+panic = "warn"
+expect_used = "warn"
+unwrap_used = "warn"
+
+# Pedantic lints (EXTREME TDD quality)
+cast_lossless = "warn"
+cast_possible_truncation = "warn"
+cast_possible_wrap = "warn"
+cast_precision_loss = "allow"  # Scientific computing may need this
+cast_sign_loss = "warn"
+checked_conversions = "warn"
+cloned_instead_of_copied = "warn"
+cognitive_complexity = "warn"
+default_trait_access = "warn"
+doc_markdown = "warn"
+empty_enum = "warn"
+enum_variant_names = "warn"
+expl_impl_clone_on_copy = "warn"
+explicit_deref_methods = "warn"
+explicit_into_iter_loop = "warn"
+explicit_iter_loop = "warn"
+filter_map_next = "warn"
+flat_map_option = "warn"
+float_cmp = "allow"  # Tests may need exact float comparison
+fn_params_excessive_bools = "warn"
+from_iter_instead_of_collect = "warn"
+if_not_else = "warn"
+implicit_clone = "warn"
+implicit_hasher = "warn"
+inconsistent_struct_constructor = "warn"
+inefficient_to_string = "warn"
+inline_always = "warn"
+invalid_upcast_comparisons = "warn"
+items_after_statements = "warn"
+large_digit_groups = "warn"
+large_stack_arrays = "warn"
+large_types_passed_by_value = "warn"
+let_unit_value = "warn"
+linkedlist = "warn"
+macro_use_imports = "warn"
+manual_assert = "warn"
+manual_instant_elapsed = "warn"
+manual_let_else = "warn"
+manual_ok_or = "warn"
+manual_string_new = "warn"
+map_flatten = "warn"
+map_unwrap_or = "warn"
+match_bool = "warn"
+match_wild_err_arm = "warn"
+match_wildcard_for_single_variants = "warn"
+maybe_infinite_iter = "warn"
+mismatching_type_param_order = "warn"
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"
+module_name_repetitions = "warn"
+must_use_candidate = "warn"
+mut_mut = "warn"
+naive_bytecount = "warn"
+needless_bitwise_bool = "warn"
+needless_continue = "warn"
+needless_for_each = "warn"
+needless_pass_by_value = "warn"
+needless_raw_string_hashes = "warn"
+negative_feature_names = "warn"
+no_effect_underscore_binding = "allow"
+no_mangle_with_rust_abi = "warn"
+option_option = "warn"
+range_minus_one = "warn"
+range_plus_one = "warn"
+rc_buffer = "warn"
+rc_mutex = "warn"
+redundant_clone = "warn"
+redundant_closure_for_method_calls = "warn"
+ref_option_ref = "warn"
+rest_pat_in_fully_bound_structs = "warn"
+same_functions_in_if_condition = "warn"
+semicolon_if_nothing_returned = "warn"
+similar_names = "warn"
+single_match_else = "warn"
+str_to_string = "warn"
+string_add_assign = "warn"
+string_add = "warn"
+string_to_string = "warn"
+struct_excessive_bools = "warn"
+too_many_lines = "warn"
+trivially_copy_pass_by_ref = "warn"
+unchecked_duration_subtraction = "warn"
+unicode_not_nfc = "warn"
+unnecessary_box_returns = "warn"
+unnecessary_join = "warn"
+unnecessary_wraps = "warn"
+unnested_or_patterns = "warn"
+unused_async = "warn"
+unused_self = "warn"
+used_underscore_binding = "warn"
+verbose_bit_mask = "warn"
+wildcard_imports = "warn"
+
+[package]
+name = "spydecy"
+version = "0.1.0"
+edition = "2021"
+authors = ["Spydecy Team <team@spydecy.dev>"]
+license = "MIT OR Apache-2.0"
+description = "Self-hosted Python/C-to-Rust compiler-debugger with introspective debugging"
+repository = "https://github.com/noahgift/spydecy"
+keywords = ["transpiler", "python", "c", "rust", "compiler"]
+categories = ["compilers", "development-tools"]
+rust-version = "1.75.0"
+
+[dependencies]
+# Workspace crates
+spydecy-debugger = { path = "crates/spydecy-debugger" }
+
+# CLI framework
+clap = { version = "4.5", features = ["derive", "cargo"] }
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+[dev-dependencies]
+# Property-based testing
+proptest = "1.5"
+proptest-derive = "0.5"
+
+# Mutation testing (via cargo-mutants CLI)
+# No runtime dependency needed
+
+# Benchmarking
+criterion = { version = "0.5", features = ["html_reports"] }
+
+# Test utilities
+pretty_assertions = "1.4"
+tempfile = "3.8"
+
+[profile.dev]
+opt-level = 0
+debug = true
+incremental = true
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = true
+panic = "abort"
+
+[profile.test]
+opt-level = 1  # Faster test execution
+
+[profile.bench]
+inherits = "release"
+
+[[bin]]
+name = "spydecy"
+path = "src/main.rs"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75.0"
+license = "MIT OR Apache-2.0"

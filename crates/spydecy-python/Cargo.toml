@@ -1,0 +1,32 @@
+[package]
+name = "spydecy-python"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+# HIR dependency
+spydecy-hir = { path = "../spydecy-hir" }
+
+# Python AST parsing via PyO3
+pyo3 = { version = "0.22", features = ["auto-initialize"] }
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Logging
+tracing = "0.1"
+
+[dev-dependencies]
+proptest = "1.5"
+pretty_assertions = "1.4"
+tempfile = "3.8"
+
+[lints]
+workspace = true
