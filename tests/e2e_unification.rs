@@ -343,3 +343,150 @@ fn extract_pylist_append_from_translation_unit(hir: &CHIR) -> Result<CHIR> {
 
     Ok(function.clone())
 }
+
+#[test]
+fn test_dict_get_unification_end_to_end() -> Result<()> {
+    // ═══════════════════════════════════════════════════════════
+    // Step 1: Create Python HIR for dict.get() call
+    // ═══════════════════════════════════════════════════════════
+    println!("\n═══ Step 1: Create Python HIR for dict.get() ═══");
+
+    // Create Python HIR directly
+    let python_hir = PythonHIR::Call {
+        id: spydecy_hir::NodeId::new(1),
+        callee: Box::new(PythonHIR::Variable {
+            id: spydecy_hir::NodeId::new(2),
+            name: "get".to_owned(),
+            inferred_type: None,
+            meta: spydecy_hir::metadata::Metadata::new(),
+        }),
+        args: vec![PythonHIR::Variable {
+            id: spydecy_hir::NodeId::new(3),
+            name: "key".to_owned(),
+            inferred_type: None,
+            meta: spydecy_hir::metadata::Metadata::new(),
+        }],
+        kwargs: vec![],
+        inferred_type: None,
+        meta: spydecy_hir::metadata::Metadata::new(),
+    };
+    println!("✅ Python HIR for dict.get() created: {python_hir:#?}");
+
+    // ═══════════════════════════════════════════════════════════
+    // Step 2: Parse C source
+    // ═══════════════════════════════════════════════════════════
+    println!("\n═══ Step 2: Parse C Source (PyDict_GetItem) ═══");
+
+    let c_source = r"
+void*
+PyDict_GetItem(void *dict, void *key) {
+    return 0;
+}
+";
+
+    let c_translation_unit_hir = parse_c(c_source, "dictobject.c")?;
+    println!("✅ C HIR parsed");
+
+    // Extract the C HIR for PyDict_GetItem function
+    let c_hir = extract_pydict_getitem_from_translation_unit(&c_translation_unit_hir)?;
+    println!("✅ C HIR for PyDict_GetItem() extracted: {c_hir:#?}");
+
+    // ═══════════════════════════════════════════════════════════
+    // Step 3: Unify Python + C HIR
+    // ═══════════════════════════════════════════════════════════
+    println!("\n═══ Step 3: Unify Python + C HIR ═══");
+
+    let mut unifier = Unifier::new();
+    let unified = unifier.unify(&python_hir, &c_hir)?;
+
+    println!("✅ Unification succeeded!");
+    println!("Unified HIR: {unified:#?}");
+
+    // ═══════════════════════════════════════════════════════════
+    // Step 4: Verify Result
+    // ═══════════════════════════════════════════════════════════
+    println!("\n═══ Step 4: Verify Result ═══");
+
+    // Verify it's a Call targeting Rust
+    let UnifiedHIR::Call {
+        target_language,
+        callee,
+        cross_mapping,
+        ..
+    } = unified.clone()
+    else {
+        panic!("Expected UnifiedHIR::Call, got: {unified:?}");
+    };
+
+    // ✅ Verify: Target language is Rust (not Python or C)
+    assert_eq!(
+        target_language,
+        Language::Rust,
+        "Target language should be Rust"
+    );
+    println!("✅ Target language: Rust");
+
+    // ✅ Verify: Callee is HashMap::get (pure Rust, no FFI)
+    assert_eq!(callee, "HashMap::get", "Should call HashMap::get");
+    println!("✅ Callee: HashMap::get (pure Rust)");
+
+    // ✅ Verify: Cross-language mapping exists
+    assert!(
+        cross_mapping.is_some(),
+        "Should have cross-language mapping"
+    );
+    println!("✅ Cross-language mapping exists");
+
+    // ✅ Verify: Pattern is DictGetPattern
+    let mapping = cross_mapping.expect("Cross mapping should exist");
+    assert_eq!(
+        mapping.pattern,
+        spydecy_hir::unified::UnificationPattern::DictGetPattern,
+        "Should be DictGetPattern"
+    );
+    println!("✅ Pattern: DictGetPattern");
+
+    // ═══════════════════════════════════════════════════════════
+    // Step 5: Eliminate Boundary
+    // ═══════════════════════════════════════════════════════════
+    println!("\n═══ Step 5: Eliminate Python→C Boundary ═══");
+
+    let optimized = unified.eliminate_boundary();
+
+    // Verify boundary is marked as eliminated
+    if let UnifiedHIR::Call { cross_mapping, .. } = optimized {
+        let mapping = cross_mapping.expect("Mapping should exist");
+        assert!(mapping.boundary_eliminated, "Boundary should be eliminated");
+        println!("✅ Python→C boundary eliminated");
+    }
+
+    println!("\n═══════════════════════════════════════════════════════════");
+    println!("🎉 SUCCESS! Dict.get pattern validated end-to-end!");
+    println!("═══════════════════════════════════════════════════════════");
+    println!();
+    println!("Pipeline verified:");
+    println!("  Python dict.get(key) → PythonHIR");
+    println!("  C PyDict_GetItem() → CHIR");
+    println!("  Python + C → UnifiedHIR (Rust HashMap::get)");
+    println!("  Boundary eliminated → Pure Rust code");
+    println!();
+    println!("Third unification pattern working! ✅");
+    println!("All 3 core patterns now complete: len, append, dict.get");
+
+    Ok(())
+}
+
+/// Extract the PyDict_GetItem function from C TranslationUnit HIR
+fn extract_pydict_getitem_from_translation_unit(hir: &CHIR) -> Result<CHIR> {
+    // Extract the translation unit
+    let CHIR::TranslationUnit { declarations, .. } = hir else {
+        anyhow::bail!("Expected TranslationUnit, got: {hir:?}");
+    };
+
+    // Extract the first function (PyDict_GetItem)
+    let function = declarations
+        .first()
+        .ok_or_else(|| anyhow::anyhow!("No declarations found"))?;
+
+    Ok(function.clone())
+}

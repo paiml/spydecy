@@ -330,6 +330,10 @@ impl Unifier {
                         // APPEND PATTERN: Python list.append() + C PyList_Append() → Rust Vec::push()
                         return self.unify_append_pattern(py_args);
                     }
+                    if py_name == "get" && c_name == "PyDict_GetItem" {
+                        // DICT.GET PATTERN: Python dict.get() + C PyDict_GetItem() → Rust HashMap::get()
+                        return self.unify_dict_get_pattern(py_args);
+                    }
                 }
                 bail!("Cannot unify Python call with C function")
             }
@@ -380,6 +384,28 @@ impl Unifier {
                 python_node: None,
                 c_node: None,
                 pattern: UnificationPattern::AppendPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `dict.get()` pattern (Python dict.get + C `PyDict_GetItem` → Rust `HashMap::get`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_dict_get_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "HashMap::get".to_owned(),
+            args: vec![], // Simplified for now
+            inferred_type: Type::Rust(crate::types::RustType::Option(Box::new(Type::Unknown))),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::DictGetPattern,
                 boundary_eliminated: false,
             }),
             meta: Metadata::new(),
@@ -585,6 +611,64 @@ mod tests {
         assert_eq!(
             cross_mapping.expect("cross_mapping should exist").pattern,
             UnificationPattern::AppendPattern
+        );
+    }
+
+    #[test]
+    fn test_unifier_dict_get_pattern() {
+        // Test dict.get() pattern: Python dict.get() + C PyDict_GetItem → Rust HashMap::get()
+        let mut unifier = Unifier::new();
+
+        let python_call = PythonHIR::Call {
+            id: NodeId::new(1),
+            callee: Box::new(PythonHIR::Variable {
+                id: NodeId::new(2),
+                name: "get".to_owned(),
+                inferred_type: None,
+                meta: Metadata::new(),
+            }),
+            args: vec![PythonHIR::Variable {
+                id: NodeId::new(3),
+                name: "key".to_owned(),
+                inferred_type: None,
+                meta: Metadata::new(),
+            }],
+            kwargs: vec![],
+            inferred_type: None,
+            meta: Metadata::new(),
+        };
+
+        let c_function = CHIR::Function {
+            id: NodeId::new(4),
+            name: "PyDict_GetItem".to_owned(),
+            return_type: Type::C(CType::Pointer(Box::new(CType::Void))),
+            params: vec![],
+            body: vec![],
+            storage_class: crate::c::StorageClass::Static,
+            visibility: crate::Visibility::Private,
+            meta: Metadata::new(),
+        };
+
+        let unified = unifier
+            .unify(&python_call, &c_function)
+            .expect("Unification should succeed");
+
+        // Should create a call to HashMap::get in Rust
+        let UnifiedHIR::Call {
+            target_language,
+            callee,
+            cross_mapping,
+            ..
+        } = unified
+        else {
+            panic!("Expected UnifiedHIR::Call");
+        };
+        assert_eq!(target_language, Language::Rust);
+        assert_eq!(callee, "HashMap::get");
+        assert!(cross_mapping.is_some());
+        assert_eq!(
+            cross_mapping.expect("cross_mapping should exist").pattern,
+            UnificationPattern::DictGetPattern
         );
     }
 

@@ -66,4 +66,12 @@ mod tests {
 
         assert_eq!(identify_pattern(&ast), Some(CPythonPattern::ListAppend));
     }
+
+    #[test]
+    fn test_identify_pydict_getitem() {
+        let mut ast = CAST::new("FunctionDecl".to_string());
+        ast.name = Some("PyDict_GetItem".to_string());
+
+        assert_eq!(identify_pattern(&ast), Some(CPythonPattern::DictGet));
+    }
 }
