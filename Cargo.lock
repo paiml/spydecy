@@ -936,6 +936,7 @@ dependencies = [
  "serde",
  "serde_json",
  "spydecy-c",
+ "spydecy-codegen",
  "spydecy-debugger",
  "spydecy-hir",
  "spydecy-optimizer",
@@ -989,6 +990,7 @@ dependencies = [
  "anyhow",
  "proptest",
  "serde",
+ "spydecy-hir",
  "thiserror",
 ]
 

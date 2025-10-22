@@ -169,6 +169,7 @@ spydecy-hir = { path = "crates/spydecy-hir" }
 spydecy-python = { path = "crates/spydecy-python" }
 spydecy-c = { path = "crates/spydecy-c" }
 spydecy-optimizer = { path = "crates/spydecy-optimizer" }
+spydecy-codegen = { path = "crates/spydecy-codegen" }
 
 # Property-based testing
 proptest = "1.5"
