@@ -155,6 +155,39 @@ test-doc: ## Run documentation tests
 .PHONY: test-all
 test-all: test test-property test-doc ## Run all test suites
 
+## Benchmarking
+
+.PHONY: bench
+bench: ## Run performance benchmarks
+	@echo "$(BLUE)Running benchmarks...$(NC)"
+	cargo bench --workspace --no-fail-fast
+	@echo "$(GREEN)✅ Benchmarks complete!$(NC)"
+	@echo "$(BLUE)View results: target/criterion/report/index.html$(NC)"
+
+.PHONY: bench-optimizer
+bench-optimizer: ## Run optimizer benchmarks only
+	@echo "$(BLUE)Running optimizer benchmarks...$(NC)"
+	cargo bench --bench optimizer_benchmarks
+	@echo "$(GREEN)✅ Optimizer benchmarks complete!$(NC)"
+
+.PHONY: bench-unification
+bench-unification: ## Run unification benchmarks only
+	@echo "$(BLUE)Running unification benchmarks...$(NC)"
+	cargo bench --bench unification_benchmarks
+	@echo "$(GREEN)✅ Unification benchmarks complete!$(NC)"
+
+.PHONY: bench-baseline
+bench-baseline: ## Save current benchmarks as baseline
+	@echo "$(BLUE)Saving baseline benchmarks...$(NC)"
+	cargo bench --workspace --no-fail-fast -- --save-baseline main
+	@echo "$(GREEN)✅ Baseline saved!$(NC)"
+
+.PHONY: bench-compare
+bench-compare: ## Compare benchmarks against baseline
+	@echo "$(BLUE)Comparing against baseline...$(NC)"
+	cargo bench --workspace --no-fail-fast -- --baseline main
+	@echo "$(GREEN)✅ Comparison complete!$(NC)"
+
 ## Coverage
 
 .PHONY: coverage

@@ -23,3 +23,4 @@ target
 # PMAT deep context file (generated for Claude Code)
 deep_context.md
 book/build/
+target/criterion/

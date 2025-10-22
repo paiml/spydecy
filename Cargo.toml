@@ -206,6 +206,14 @@ inherits = "release"
 name = "spydecy"
 path = "src/main.rs"
 
+[[bench]]
+name = "optimizer_benchmarks"
+harness = false
+
+[[bench]]
+name = "unification_benchmarks"
+harness = false
+
 [workspace.package]
 version = "0.2.0"
 edition = "2021"
