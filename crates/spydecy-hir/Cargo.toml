@@ -4,6 +4,11 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+description = "High-level Intermediate Representation (HIR) for Spydecy transpiler"
+repository = "https://github.com/noahgift/spydecy"
+authors = ["Spydecy Team <team@spydecy.dev>"]
+keywords = ["compiler", "hir", "intermediate-representation"]
+categories = ["compilers"]
 
 [dependencies]
 anyhow = "1.0"

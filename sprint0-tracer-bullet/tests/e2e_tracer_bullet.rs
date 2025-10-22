@@ -6,8 +6,10 @@
 //! 1. ✅ Python HIR + C HIR → Unified HIR (unification works)
 //! 2. ✅ Optimization eliminates Python→C boundary
 //! 3. ✅ Generated Rust compiles
-//! 4. ✅ Behavior matches Python len()
+//! 4. ✅ Behavior matches Python `len()`
 //! 5. ✅ No FFI calls in generated code
+
+#![allow(clippy::expect_used, clippy::panic, clippy::uninlined_format_args)]
 
 use sprint0_tracer_bullet::{Language, MiniHIR};
 
@@ -20,10 +22,10 @@ fn test_tracer_bullet_full_pipeline() {
     println!("Python: def my_len(x): return len(x)");
 
     let python_hir = MiniHIR::PythonFunction {
-        name: "my_len".to_string(),
+        name: "my_len".to_owned(),
         body: vec![MiniHIR::PythonCall {
-            callee: "len".to_string(),
-            args: vec![MiniHIR::PythonVar("x".to_string())],
+            callee: "len".to_owned(),
+            args: vec![MiniHIR::PythonVar("x".to_owned())],
         }],
     };
 
@@ -36,10 +38,10 @@ fn test_tracer_bullet_full_pipeline() {
     println!("C: size_t list_length(PyListObject *self) {{ return Py_SIZE(self); }}");
 
     let c_hir = MiniHIR::CFunction {
-        name: "list_length".to_string(),
+        name: "list_length".to_owned(),
         body: vec![MiniHIR::CFieldAccess {
-            object: Box::new(MiniHIR::PythonVar("self".to_string())),
-            field: "Py_SIZE".to_string(),
+            object: Box::new(MiniHIR::PythonVar("self".to_owned())),
+            field: "Py_SIZE".to_owned(),
         }],
     };
 
@@ -52,7 +54,9 @@ fn test_tracer_bullet_full_pipeline() {
 
     // Extract the Python call from the function body
     let python_call = match &python_hir {
-        MiniHIR::PythonFunction { body, .. } => body.first().unwrap(),
+        MiniHIR::PythonFunction { body, .. } => {
+            body.first().expect("Function body should not be empty")
+        }
         _ => panic!("Expected PythonFunction"),
     };
 
@@ -96,7 +100,7 @@ fn test_tracer_bullet_full_pipeline() {
 
     // Reconstruct the function with optimized body
     let final_hir = MiniHIR::PythonFunction {
-        name: "my_len".to_string(),
+        name: "my_len".to_owned(),
         body: vec![optimized],
     };
 
@@ -166,16 +170,16 @@ fn test_unification_creates_correct_rust_mapping() {
     // Python len() + C list_length() → Rust Vec::len()
 
     let python_call = MiniHIR::PythonCall {
-        callee: "len".to_string(),
-        args: vec![MiniHIR::PythonVar("my_list".to_string())],
+        callee: "len".to_owned(),
+        args: vec![MiniHIR::PythonVar("my_list".to_owned())],
     };
 
     let c_function = MiniHIR::CFunction {
-        name: "list_length".to_string(),
+        name: "list_length".to_owned(),
         body: vec![],
     };
 
-    let unified = MiniHIR::unify(&python_call, &c_function).unwrap();
+    let unified = MiniHIR::unify(&python_call, &c_function).expect("Unification should succeed");
 
     // Should map to Vec::len in Rust
     match unified {
@@ -199,7 +203,7 @@ fn test_boundary_elimination_removes_ffi() {
 
     let cross_language = MiniHIR::UnifiedCall {
         target_language: Language::Python,
-        callee: "len".to_string(),
+        callee: "len".to_owned(),
         args: vec![],
     };
 
@@ -220,10 +224,10 @@ fn test_codegen_produces_valid_rust_syntax() {
     // Verify generated code looks like valid Rust
 
     let hir = MiniHIR::PythonFunction {
-        name: "test_func".to_string(),
+        name: "test_func".to_owned(),
         body: vec![MiniHIR::UnifiedCall {
             target_language: Language::Rust,
-            callee: "Vec::len".to_string(),
+            callee: "Vec::len".to_owned(),
             args: vec![],
         }],
     };

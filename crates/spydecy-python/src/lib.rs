@@ -12,10 +12,19 @@
 
 #![warn(missing_docs, clippy::all, clippy::pedantic)]
 #![deny(unsafe_code)]
+#![allow(
+    clippy::doc_markdown,
+    clippy::single_match_else,
+    clippy::single_match,
+    clippy::module_name_repetitions,
+    clippy::str_to_string,
+    clippy::unwrap_used,
+    clippy::panic
+)]
 
+pub mod hir_converter;
 pub mod parser;
 pub mod type_extractor;
-pub mod hir_converter;
 
 use anyhow::Result;
 use spydecy_hir::python::PythonHIR;

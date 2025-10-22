@@ -4,11 +4,16 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+description = "Introspective debugger for Spydecy transpiler"
+repository = "https://github.com/noahgift/spydecy"
+authors = ["Spydecy Team <team@spydecy.dev>"]
+keywords = ["debugger", "transpiler", "introspection"]
+categories = ["compilers", "development-tools::debugging"]
 
 [dependencies]
 # HIR and Python parser dependencies
-spydecy-hir = { path = "../spydecy-hir" }
-spydecy-python = { path = "../spydecy-python" }
+spydecy-hir = { version = "0.1.0", path = "../spydecy-hir" }
+spydecy-python = { version = "0.1.0", path = "../spydecy-python" }
 
 # Error handling
 anyhow = "1.0"

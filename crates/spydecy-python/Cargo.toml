@@ -4,10 +4,15 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+description = "Python AST parser and transpiler frontend for Spydecy"
+repository = "https://github.com/noahgift/spydecy"
+authors = ["Spydecy Team <team@spydecy.dev>"]
+keywords = ["python", "parser", "transpiler", "ast"]
+categories = ["compilers", "parser-implementations"]
 
 [dependencies]
 # HIR dependency
-spydecy-hir = { path = "../spydecy-hir" }
+spydecy-hir = { version = "0.1.0", path = "../spydecy-hir" }
 
 # Python AST parsing via PyO3
 pyo3 = { version = "0.22", features = ["auto-initialize"] }

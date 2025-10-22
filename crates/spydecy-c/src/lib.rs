@@ -13,10 +13,23 @@
 #![warn(missing_docs, clippy::all, clippy::pedantic)]
 // Note: clang-sys requires unsafe for FFI, allowed only in this crate
 #![allow(unsafe_code)]
+#![allow(
+    clippy::doc_markdown,
+    clippy::single_match,
+    clippy::module_name_repetitions,
+    clippy::borrow_as_ptr,
+    clippy::ptr_as_ptr,
+    clippy::ptr_cast_constness,
+    clippy::cast_sign_loss,
+    clippy::str_to_string,
+    clippy::unwrap_used,
+    clippy::ref_option,
+    clippy::wildcard_imports
+)]
 
-pub mod parser;
 pub mod cpython;
 pub mod hir_converter;
+pub mod parser;
 
 use anyhow::Result;
 use spydecy_hir::c::CHIR;

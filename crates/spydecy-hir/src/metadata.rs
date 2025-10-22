@@ -164,13 +164,13 @@ mod tests {
 
     #[test]
     fn test_metadata_with_docs() {
-        let meta = Metadata::new().with_docs("Test documentation".to_string());
-        assert_eq!(meta.docs, Some("Test documentation".to_string()));
+        let meta = Metadata::new().with_docs("Test documentation".to_owned());
+        assert_eq!(meta.docs, Some("Test documentation".to_owned()));
     }
 
     #[test]
     fn test_attribute_creation() {
-        let attr = Attribute::new("staticmethod".to_string());
+        let attr = Attribute::new("staticmethod".to_owned());
         assert_eq!(attr.name, "staticmethod");
         assert!(attr.args.is_empty());
     }

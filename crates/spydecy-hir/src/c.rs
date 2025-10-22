@@ -7,6 +7,7 @@ use crate::{metadata::Metadata, types::Type, NodeId, Visibility};
 use serde::{Deserialize, Serialize};
 
 /// C HIR node
+#[allow(clippy::module_name_repetitions)]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum CHIR {
     /// Translation unit (file)
@@ -462,7 +463,7 @@ mod tests {
     fn test_c_function_creation() {
         let func = CHIR::Function {
             id: NodeId::new(1),
-            name: "list_length".to_string(),
+            name: "list_length".to_owned(),
             return_type: Type::C(crate::types::CType::SizeT),
             params: vec![],
             body: vec![],
@@ -480,7 +481,7 @@ mod tests {
             id: NodeId::new(2),
             callee: Box::new(CHIR::Variable {
                 id: NodeId::new(3),
-                name: "PyList_Append".to_string(),
+                name: "PyList_Append".to_owned(),
                 var_type: None,
                 meta: Metadata::new(),
             }),
@@ -495,7 +496,7 @@ mod tests {
             id: NodeId::new(4),
             callee: Box::new(CHIR::Variable {
                 id: NodeId::new(5),
-                name: "strlen".to_string(),
+                name: "strlen".to_owned(),
                 var_type: None,
                 meta: Metadata::new(),
             }),
@@ -511,7 +512,7 @@ mod tests {
     fn test_cpython_macro() {
         let macro_call = CHIR::CPythonMacro {
             id: NodeId::new(6),
-            name: "Py_SIZE".to_string(),
+            name: "Py_SIZE".to_owned(),
             args: vec![],
             inferred_type: None,
             meta: Metadata::new(),

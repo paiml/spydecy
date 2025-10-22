@@ -47,11 +47,11 @@
 #![warn(missing_docs, clippy::all, clippy::pedantic)]
 #![deny(unsafe_code)]
 
-pub mod python;
 pub mod c;
-pub mod unified;
-pub mod types;
 pub mod metadata;
+pub mod python;
+pub mod types;
+pub mod unified;
 
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -139,12 +139,7 @@ mod tests {
 
     #[test]
     fn test_source_location_creation() {
-        let loc = SourceLocation::new(
-            "test.py".to_string(),
-            10,
-            5,
-            Language::Python,
-        );
+        let loc = SourceLocation::new("test.py".to_owned(), 10, 5, Language::Python);
         assert_eq!(loc.line, 10);
         assert_eq!(loc.column, 5);
         assert_eq!(loc.language, Language::Python);

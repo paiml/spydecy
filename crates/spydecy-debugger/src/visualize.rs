@@ -27,14 +27,27 @@ pub fn visualize_python(file_path: &Path) -> Result<String> {
     let mut output = String::new();
 
     // Header
-    output.push_str(&format!("{}",  "╔══════════════════════════════════════════════════════════╗\n".cyan()));
-    output.push_str(&format!("{}",  "║  Spydecy Debugger: Python AST Visualization             ║\n".cyan()));
-    output.push_str(&format!("{}",  "╚══════════════════════════════════════════════════════════╝\n".cyan()));
+    output.push_str(&format!(
+        "{}",
+        "╔══════════════════════════════════════════════════════════╗\n".cyan()
+    ));
+    output.push_str(&format!(
+        "{}",
+        "║  Spydecy Debugger: Python AST Visualization             ║\n".cyan()
+    ));
+    output.push_str(&format!(
+        "{}",
+        "╚══════════════════════════════════════════════════════════╝\n".cyan()
+    ));
     output.push('\n');
 
     // File info
     output.push_str(&format!("{} {}\n", "File:".bold(), file_path.display()));
-    output.push_str(&format!("{} {} lines\n", "Size:".bold(), source.lines().count()));
+    output.push_str(&format!(
+        "{} {} lines\n",
+        "Size:".bold(),
+        source.lines().count()
+    ));
     output.push('\n');
 
     // Source code preview
@@ -45,7 +58,10 @@ pub fn visualize_python(file_path: &Path) -> Result<String> {
     output.push('\n');
 
     // AST tree
-    output.push_str(&format!("{}\n", "═══ Abstract Syntax Tree ═══".green().bold()));
+    output.push_str(&format!(
+        "{}\n",
+        "═══ Abstract Syntax Tree ═══".green().bold()
+    ));
     format_ast_node(&ast, 0, &mut output);
     output.push('\n');
 
@@ -53,9 +69,17 @@ pub fn visualize_python(file_path: &Path) -> Result<String> {
     output.push_str(&format!("{}\n", "═══ Statistics ═══".blue().bold()));
     let node_count = count_nodes(&ast);
     output.push_str(&format!("  {} {}\n", "Total AST nodes:".bold(), node_count));
-    output.push_str(&format!("  {} {}\n", "Root node type:".bold(), ast.node_type));
+    output.push_str(&format!(
+        "  {} {}\n",
+        "Root node type:".bold(),
+        ast.node_type
+    ));
     if !ast.children.is_empty() {
-        output.push_str(&format!("  {} {}\n", "Direct children:".bold(), ast.children.len()));
+        output.push_str(&format!(
+            "  {} {}\n",
+            "Direct children:".bold(),
+            ast.children.len()
+        ));
     }
 
     Ok(output)
@@ -120,11 +144,7 @@ mod tests {
     #[test]
     fn test_visualize_simple_function() {
         let mut temp_file = NamedTempFile::new().unwrap();
-        writeln!(
-            temp_file,
-            "def my_len(x):\n    return len(x)"
-        )
-        .unwrap();
+        writeln!(temp_file, "def my_len(x):\n    return len(x)").unwrap();
 
         let result = visualize_python(temp_file.path());
         assert!(result.is_ok());

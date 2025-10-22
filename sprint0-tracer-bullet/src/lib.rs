@@ -104,9 +104,7 @@ impl MiniHIR {
             }
 
             // No unification possible
-            _ => anyhow::bail!(
-                "Cannot unify Python HIR {python_hir:?} with C HIR {c_hir:?}"
-            ),
+            _ => anyhow::bail!("Cannot unify Python HIR {python_hir:?} with C HIR {c_hir:?}"),
         }
     }
 
@@ -161,6 +159,7 @@ impl MiniHIR {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used)]
 mod tests {
     use super::*;
 
@@ -168,29 +167,29 @@ mod tests {
     fn test_unify_len_call() {
         // Python: len(x)
         let python_hir = MiniHIR::PythonCall {
-            callee: "len".to_string(),
-            args: vec![MiniHIR::PythonVar("x".to_string())],
+            callee: "len".to_owned(),
+            args: vec![MiniHIR::PythonVar("x".to_owned())],
         };
 
         // C: list_length(obj)
         let c_hir = MiniHIR::CFunction {
-            name: "list_length".to_string(),
+            name: "list_length".to_owned(),
             body: vec![MiniHIR::CFieldAccess {
-                object: Box::new(MiniHIR::PythonVar("self".to_string())),
-                field: "Py_SIZE".to_string(),
+                object: Box::new(MiniHIR::PythonVar("self".to_owned())),
+                field: "Py_SIZE".to_owned(),
             }],
         };
 
         // Unify
-        let unified = MiniHIR::unify(&python_hir, &c_hir).unwrap();
+        let unified = MiniHIR::unify(&python_hir, &c_hir).expect("Unification should succeed");
 
         // Should create UnifiedCall targeting Rust
         assert_eq!(
             unified,
             MiniHIR::UnifiedCall {
                 target_language: Language::Rust,
-                callee: "Vec::len".to_string(),
-                args: vec![MiniHIR::PythonVar("x".to_string())],
+                callee: "Vec::len".to_owned(),
+                args: vec![MiniHIR::PythonVar("x".to_owned())],
             }
         );
     }
@@ -199,8 +198,8 @@ mod tests {
     fn test_eliminate_boundary() {
         let unified = MiniHIR::UnifiedCall {
             target_language: Language::Python,
-            callee: "len".to_string(),
-            args: vec![MiniHIR::PythonVar("x".to_string())],
+            callee: "len".to_owned(),
+            args: vec![MiniHIR::PythonVar("x".to_owned())],
         };
 
         let optimized = unified.eliminate_boundary();
@@ -209,8 +208,8 @@ mod tests {
             optimized,
             MiniHIR::UnifiedCall {
                 target_language: Language::Rust,
-                callee: "Vec::len".to_string(),
-                args: vec![MiniHIR::PythonVar("x".to_string())],
+                callee: "Vec::len".to_owned(),
+                args: vec![MiniHIR::PythonVar("x".to_owned())],
             }
         );
     }
@@ -218,11 +217,11 @@ mod tests {
     #[test]
     fn test_codegen_rust() {
         let python_func = MiniHIR::PythonFunction {
-            name: "my_len".to_string(),
+            name: "my_len".to_owned(),
             body: vec![MiniHIR::UnifiedCall {
                 target_language: Language::Rust,
-                callee: "Vec::len".to_string(),
-                args: vec![MiniHIR::PythonVar("x".to_string())],
+                callee: "Vec::len".to_owned(),
+                args: vec![MiniHIR::PythonVar("x".to_owned())],
             }],
         };
 
@@ -236,8 +235,8 @@ mod tests {
 
     #[test]
     fn test_unify_fails_on_mismatch() {
-        let python_hir = MiniHIR::PythonVar("x".to_string());
-        let c_hir = MiniHIR::PythonVar("y".to_string());
+        let python_hir = MiniHIR::PythonVar("x".to_owned());
+        let c_hir = MiniHIR::PythonVar("y".to_owned());
 
         let result = MiniHIR::unify(&python_hir, &c_hir);
         assert!(result.is_err());

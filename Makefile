@@ -185,16 +185,16 @@ ifndef PMAT
 	@echo "Run: cargo install pmat"
 	@exit 1
 endif
-	pmat analyze complexity . --fail-on-violation --max-complexity 10
-	pmat analyze satd . --fail-on-violation
+	pmat analyze complexity --path . --fail-on-violation --max-cyclomatic 10
+	pmat analyze satd --path . --fail-on-violation
 	@echo "$(GREEN)✅ PMAT quality checks passed!$(NC)"
 
 .PHONY: pmat-report
 pmat-report: ## Generate PMAT quality report
 	@echo "$(BLUE)Generating PMAT quality report...$(NC)"
 	mkdir -p docs/reports
-	pmat analyze complexity . --output docs/reports/complexity.json || true
-	pmat analyze satd . --output docs/reports/satd.json || true
+	pmat analyze complexity --path . --output docs/reports/complexity.json || true
+	pmat analyze satd --path . --output docs/reports/satd.json || true
 	@echo "$(GREEN)Reports generated in docs/reports/$(NC)"
 
 ## Quality Gate - Full Suite

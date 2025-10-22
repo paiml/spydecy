@@ -123,11 +123,7 @@ impl CParser {
         // Visit the AST
         let mut root = CAST::new("TranslationUnit".to_string());
         unsafe {
-            clang_visitChildren(
-                cursor,
-                visit_node,
-                &mut root as *mut CAST as CXClientData,
-            );
+            clang_visitChildren(cursor, visit_node, &mut root as *mut CAST as CXClientData);
         }
 
         // Cleanup
@@ -202,11 +198,7 @@ extern "C" fn visit_node(
         }
 
         // Recursively visit children
-        clang_visitChildren(
-            cursor,
-            visit_node,
-            &mut node as *mut CAST as CXClientData,
-        );
+        clang_visitChildren(cursor, visit_node, &mut node as *mut CAST as CXClientData);
 
         parent_ast.children.push(node);
 
@@ -252,8 +244,11 @@ unsafe fn is_empty_string(cx_string: &CXString) -> bool {
 
 /// Check if a name is a CPython API identifier
 fn is_cpython_api_name(name: &str) -> bool {
-    name.starts_with("Py") || name.starts_with("_Py") || name.starts_with("PyList_")
-        || name.starts_with("PyDict_") || name.starts_with("PyObject_")
+    name.starts_with("Py")
+        || name.starts_with("_Py")
+        || name.starts_with("PyList_")
+        || name.starts_with("PyDict_")
+        || name.starts_with("PyObject_")
 }
 
 /// Parse C source code (convenience function)

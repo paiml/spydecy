@@ -10,6 +10,13 @@
 
 #![warn(missing_docs, clippy::all, clippy::pedantic)]
 #![deny(unsafe_code)]
+#![allow(
+    clippy::module_name_repetitions,
+    clippy::format_push_string,
+    clippy::str_to_string,
+    clippy::unwrap_used,
+    clippy::uninlined_format_args
+)]
 
 pub mod visualize;
 
@@ -34,11 +41,7 @@ mod tests {
     #[test]
     fn test_visualize_simple_function() {
         let mut temp_file = NamedTempFile::new().unwrap();
-        writeln!(
-            temp_file,
-            "def my_len(x):\n    return len(x)"
-        )
-        .unwrap();
+        writeln!(temp_file, "def my_len(x):\n    return len(x)").unwrap();
 
         let result = visualize_python_ast(temp_file.path());
         assert!(result.is_ok());

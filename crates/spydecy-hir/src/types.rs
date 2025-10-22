@@ -192,14 +192,15 @@ pub enum IntSize {
 impl Type {
     /// Check if type is compatible with another type (for unification)
     #[must_use]
+    #[allow(clippy::unnested_or_patterns)]
     pub fn is_compatible(&self, other: &Self) -> bool {
         match (self, other) {
             // Python list → Rust Vec
-            (Type::Python(PythonType::List(_)), Type::Rust(RustType::Vec(_))) => true,
             // Python dict → Rust HashMap
-            (Type::Python(PythonType::Dict { .. }), Type::Rust(RustType::HashMap { .. })) => true,
             // C PyListObject → Rust Vec
-            (Type::C(CType::CPython(CPythonType::PyListObject)), Type::Rust(RustType::Vec(_))) => {
+            (Type::Python(PythonType::List(_)), Type::Rust(RustType::Vec(_)))
+            | (Type::Python(PythonType::Dict { .. }), Type::Rust(RustType::HashMap { .. }))
+            | (Type::C(CType::CPython(CPythonType::PyListObject)), Type::Rust(RustType::Vec(_))) => {
                 true
             }
             // Same types are compatible
@@ -218,7 +219,10 @@ impl fmt::Display for Type {
             Self::C(c_type) => write!(f, "{c_type}"),
             Self::Rust(rust_type) => write!(f, "{rust_type}"),
             Self::Generic { name, .. } => write!(f, "{name}"),
-            Self::Function { params, return_type } => {
+            Self::Function {
+                params,
+                return_type,
+            } => {
                 write!(f, "fn(")?;
                 for (i, param) in params.iter().enumerate() {
                     if i > 0 {

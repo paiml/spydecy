@@ -7,6 +7,7 @@ use crate::{metadata::Metadata, types::Type, NodeId, Visibility};
 use serde::{Deserialize, Serialize};
 
 /// Python HIR node
+#[allow(clippy::module_name_repetitions)]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum PythonHIR {
     /// Module (top-level)
@@ -371,7 +372,7 @@ mod tests {
     fn test_python_function_creation() {
         let func = PythonHIR::Function {
             id: NodeId::new(1),
-            name: "test_func".to_string(),
+            name: "test_func".to_owned(),
             params: vec![],
             return_type: None,
             body: vec![],
@@ -389,7 +390,7 @@ mod tests {
             id: NodeId::new(2),
             callee: Box::new(PythonHIR::Variable {
                 id: NodeId::new(3),
-                name: "len".to_string(),
+                name: "len".to_owned(),
                 inferred_type: None,
                 meta: Metadata::new(),
             }),

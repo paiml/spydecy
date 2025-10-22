@@ -147,7 +147,7 @@ rust-version = "1.75.0"
 
 [dependencies]
 # Workspace crates
-spydecy-debugger = { path = "crates/spydecy-debugger" }
+spydecy-debugger = { version = "0.1.0", path = "crates/spydecy-debugger" }
 
 # CLI framework
 clap = { version = "4.5", features = ["derive", "cargo"] }

@@ -21,6 +21,7 @@ pub fn extract_type_hints(ast: &PythonAST) -> Result<Vec<(String, Type)>> {
     Ok(type_hints)
 }
 
+#[allow(clippy::unnecessary_wraps)]
 fn extract_type_hints_recursive(
     _ast: &PythonAST,
     _type_hints: &mut Vec<(String, Type)>,

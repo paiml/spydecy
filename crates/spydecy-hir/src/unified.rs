@@ -27,6 +27,7 @@ use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
 
 /// Unified HIR node - combines Python and C into a single representation
+#[allow(clippy::module_name_repetitions)]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum UnifiedHIR {
     /// Module/compilation unit
@@ -185,6 +186,7 @@ pub enum UnifiedHIR {
 }
 
 /// Unified parameter (bridges Python and C parameters)
+#[allow(clippy::module_name_repetitions)]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UnifiedParameter {
     /// Parameter name
@@ -301,6 +303,11 @@ impl Unifier {
     ///
     /// This is the CRITICAL function validated by Sprint 0.
     /// It recognizes Python-C patterns and creates a unified representation.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the Python and C HIR nodes cannot be unified
+    /// (i.e., no known pattern matches the combination).
     pub fn unify(&mut self, python: &PythonHIR, c: &CHIR) -> Result<UnifiedHIR> {
         // Pattern matching for known Python-C relationships
         match (python, c) {
@@ -314,10 +321,7 @@ impl Unifier {
                 },
                 CHIR::Function { name: c_name, .. },
             ) => {
-                if let PythonHIR::Variable {
-                    name: py_name, ..
-                } = py_callee.as_ref()
-                {
+                if let PythonHIR::Variable { name: py_name, .. } = py_callee.as_ref() {
                     if py_name == "len" && c_name == "list_length" {
                         // VALIDATED PATTERN from Sprint 0!
                         return self.unify_len_pattern(py_args);
@@ -327,13 +331,12 @@ impl Unifier {
             }
 
             // More patterns will be added here as we extend the unifier
-            _ => bail!(
-                "Cannot unify Python HIR {python:?} with C HIR {c:?}"
-            ),
+            _ => bail!("Cannot unify Python HIR {python:?} with C HIR {c:?}"),
         }
     }
 
     /// Unify the `len()` pattern (from Sprint 0)
+    #[allow(clippy::unnecessary_wraps)]
     fn unify_len_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
         let id = self.next_node_id();
 
@@ -443,6 +446,7 @@ impl UnifiedHIR {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used, clippy::panic, clippy::similar_names)]
 mod tests {
     use super::*;
     use crate::types::*;
@@ -456,7 +460,7 @@ mod tests {
             id: NodeId::new(1),
             callee: Box::new(PythonHIR::Variable {
                 id: NodeId::new(2),
-                name: "len".to_string(),
+                name: "len".to_owned(),
                 inferred_type: None,
                 meta: Metadata::new(),
             }),
@@ -468,7 +472,7 @@ mod tests {
 
         let c_function = CHIR::Function {
             id: NodeId::new(3),
-            name: "list_length".to_string(),
+            name: "list_length".to_owned(),
             return_type: Type::C(CType::SizeT),
             params: vec![],
             body: vec![],
@@ -477,26 +481,27 @@ mod tests {
             meta: Metadata::new(),
         };
 
-        let unified = unifier.unify(&python_call, &c_function).unwrap();
+        let unified = unifier
+            .unify(&python_call, &c_function)
+            .expect("Unification should succeed");
 
         // Should create a call to Vec::len in Rust
-        if let UnifiedHIR::Call {
+        let UnifiedHIR::Call {
             target_language,
             callee,
             cross_mapping,
             ..
         } = unified
-        {
-            assert_eq!(target_language, Language::Rust);
-            assert_eq!(callee, "Vec::len");
-            assert!(cross_mapping.is_some());
-            assert_eq!(
-                cross_mapping.unwrap().pattern,
-                UnificationPattern::LenPattern
-            );
-        } else {
+        else {
             panic!("Expected UnifiedHIR::Call");
-        }
+        };
+        assert_eq!(target_language, Language::Rust);
+        assert_eq!(callee, "Vec::len");
+        assert!(cross_mapping.is_some());
+        assert_eq!(
+            cross_mapping.expect("cross_mapping should exist").pattern,
+            UnificationPattern::LenPattern
+        );
     }
 
     #[test]
@@ -505,7 +510,7 @@ mod tests {
         let call = UnifiedHIR::Call {
             id: NodeId::new(1),
             target_language: Language::Python,
-            callee: "len".to_string(),
+            callee: "len".to_owned(),
             args: vec![],
             inferred_type: Type::Unknown,
             source_language: Language::Python,
@@ -520,11 +525,12 @@ mod tests {
 
         let optimized = call.eliminate_boundary();
 
-        if let UnifiedHIR::Call {
-            cross_mapping, ..
-        } = optimized
-        {
-            assert!(cross_mapping.unwrap().boundary_eliminated);
+        if let UnifiedHIR::Call { cross_mapping, .. } = optimized {
+            assert!(
+                cross_mapping
+                    .expect("cross_mapping should exist")
+                    .boundary_eliminated
+            );
         }
     }
 }
