@@ -48,6 +48,12 @@ use anyhow::Result;
 /// and Spydecy's type system. This is Phase 1 of the integration plan.
 pub struct DecyTypeConverter;
 
+/// Function converter between Decy and Spydecy
+///
+/// This struct provides methods to convert complete HIR functions from Decy
+/// to Spydecy CHIR. This is Phase 2 of the integration plan.
+pub struct DecyFunctionConverter;
+
 impl DecyTypeConverter {
     /// Convert Decy type to Spydecy type
     ///
@@ -133,8 +139,90 @@ impl DecyTypeConverter {
     }
 }
 
+impl DecyFunctionConverter {
+    /// Convert Decy `HirFunction` to Spydecy CHIR Function
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the conversion fails
+    pub fn convert(decy_func: &decy_hir::HirFunction) -> Result<spydecy_hir::c::CHIR> {
+        use spydecy_hir::{
+            c::{Parameter, StorageClass, CHIR},
+            metadata::Metadata,
+            NodeId, Visibility,
+        };
+
+        // Convert return type
+        let return_type = DecyTypeConverter::convert(decy_func.return_type())?;
+
+        // Convert parameters
+        let params: Result<Vec<Parameter>> = decy_func
+            .parameters()
+            .iter()
+            .map(|p| {
+                Ok(Parameter {
+                    name: p.name().to_owned(),
+                    param_type: DecyTypeConverter::convert(p.param_type())?,
+                })
+            })
+            .collect();
+
+        // Create CHIR function
+        // Note: Body conversion would be more complex and is left for Phase 2b
+        Ok(CHIR::Function {
+            id: NodeId::new(1),
+            name: decy_func.name().to_owned(),
+            return_type,
+            params: params?,
+            body: vec![], // Body statements would be converted here
+            storage_class: StorageClass::Static, // Default to static
+            visibility: Visibility::Private, // Default to private
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Parse C source with decy-parser and convert to Spydecy CHIR
+    ///
+    /// This is a convenience method combining parsing and conversion.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if parsing or conversion fails
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use spydecy_decy_bridge::DecyFunctionConverter;
+    ///
+    /// let c_source = "int add(int a, int b) { return a + b; }";
+    /// let spydecy_hir = DecyFunctionConverter::parse_and_convert(c_source, "add.c")?;
+    /// # Ok::<(), anyhow::Error>(())
+    /// ```
+    pub fn parse_and_convert(c_source: &str, filename: &str) -> Result<spydecy_hir::c::CHIR> {
+        use anyhow::Context;
+
+        // Parse with decy's comprehensive C parser
+        let parser = decy_parser::CParser::new()?;
+        let ast = parser
+            .parse(c_source)
+            .with_context(|| format!("Failed to parse C source: {filename}"))?;
+
+        // Get first function from AST
+        let func = ast
+            .functions()
+            .first()
+            .with_context(|| format!("No functions found in {filename}"))?;
+
+        // Convert AST function to decy HIR
+        let decy_hir = decy_hir::HirFunction::from_ast_function(func);
+
+        // Convert decy HIR to spydecy CHIR
+        Self::convert(&decy_hir).context("Failed to convert Decy HIR to Spydecy CHIR")
+    }
+}
+
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
+#[allow(clippy::unwrap_used, clippy::panic)]
 mod tests {
     use super::*;
 
@@ -201,5 +289,80 @@ mod tests {
             converted,
             spydecy_hir::types::Type::C(spydecy_hir::types::CType::Struct(_))
         ));
+    }
+
+    #[test]
+    fn test_convert_function_simple() {
+        // Create a simple Decy function: int add(int a, int b)
+        let decy_func = decy_hir::HirFunction::new(
+            "add".to_owned(),
+            decy_hir::HirType::Int,
+            vec![
+                decy_hir::HirParameter::new("a".to_owned(), decy_hir::HirType::Int),
+                decy_hir::HirParameter::new("b".to_owned(), decy_hir::HirType::Int),
+            ],
+        );
+
+        // Convert to Spydecy CHIR
+        let spydecy_func = DecyFunctionConverter::convert(&decy_func).unwrap();
+
+        // Verify it's a function
+        if let spydecy_hir::c::CHIR::Function {
+            name,
+            return_type,
+            params,
+            ..
+        } = spydecy_func
+        {
+            assert_eq!(name, "add");
+            assert!(matches!(
+                return_type,
+                spydecy_hir::types::Type::C(spydecy_hir::types::CType::Int)
+            ));
+            assert_eq!(params.len(), 2);
+            assert_eq!(params[0].name, "a");
+            assert_eq!(params[1].name, "b");
+        } else {
+            panic!("Expected CHIR::Function");
+        }
+    }
+
+    #[test]
+    fn test_convert_function_no_params() {
+        // Create function: int main()
+        let decy_func =
+            decy_hir::HirFunction::new("main".to_owned(), decy_hir::HirType::Int, vec![]);
+
+        let spydecy_func = DecyFunctionConverter::convert(&decy_func).unwrap();
+
+        if let spydecy_hir::c::CHIR::Function { name, params, .. } = spydecy_func {
+            assert_eq!(name, "main");
+            assert_eq!(params.len(), 0);
+        } else {
+            panic!("Expected CHIR::Function");
+        }
+    }
+
+    #[test]
+    fn test_parse_and_convert_integration() {
+        // Test parsing C code with decy-parser and converting to Spydecy
+        let c_source = r"
+            static int add(int x, int y) {
+                return x + y;
+            }
+        ";
+
+        let result = DecyFunctionConverter::parse_and_convert(c_source, "test.c");
+        assert!(result.is_ok(), "Should parse and convert C code");
+
+        let spydecy_func = result.unwrap();
+        if let spydecy_hir::c::CHIR::Function { name, params, .. } = spydecy_func {
+            assert_eq!(name, "add");
+            assert_eq!(params.len(), 2);
+            assert_eq!(params[0].name, "x");
+            assert_eq!(params[1].name, "y");
+        } else {
+            panic!("Expected CHIR::Function");
+        }
     }
 }
