@@ -178,6 +178,18 @@ impl RustCodegen {
                 // Vec::clear() becomes x.clear()
                 "x.clear()".to_owned()
             }
+            UnificationPattern::PopPattern => {
+                // Vec::pop() becomes x.pop()
+                "x.pop()".to_owned()
+            }
+            UnificationPattern::InsertPattern => {
+                // Vec::insert() becomes x.insert(index, value)
+                "x.insert(index, value)".to_owned()
+            }
+            UnificationPattern::ExtendPattern => {
+                // Vec::extend() becomes x.extend(iter)
+                "x.extend(iter)".to_owned()
+            }
             UnificationPattern::Custom => format!("{callee}()"),
         }
     }

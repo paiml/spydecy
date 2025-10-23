@@ -22,6 +22,9 @@ fn create_sample_hir(pattern: UnificationPattern) -> UnifiedHIR {
         UnificationPattern::DictGetPattern => "HashMap::get",
         UnificationPattern::ReversePattern => "Vec::reverse",
         UnificationPattern::ClearPattern => "Vec::clear",
+        UnificationPattern::PopPattern => "Vec::pop",
+        UnificationPattern::InsertPattern => "Vec::insert",
+        UnificationPattern::ExtendPattern => "Vec::extend",
         UnificationPattern::Custom => "custom",
     };
 

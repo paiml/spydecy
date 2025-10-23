@@ -223,6 +223,12 @@ pub enum UnificationPattern {
     ReversePattern,
     /// Python `list.clear()` → C `list_clear()` → Rust `Vec::clear()`
     ClearPattern,
+    /// Python `list.pop()` → C `list_pop()` → Rust `Vec::pop()`
+    PopPattern,
+    /// Python `list.insert()` → C `list_insert()` → Rust `Vec::insert()`
+    InsertPattern,
+    /// Python `list.extend()` → C `list_extend()` → Rust `Vec::extend()`
+    ExtendPattern,
     /// Custom pattern (extensible)
     Custom,
 }
@@ -346,6 +352,18 @@ impl Unifier {
                         // CLEAR PATTERN: Python list.clear() + C list_clear() → Rust Vec::clear()
                         return self.unify_clear_pattern(py_args);
                     }
+                    if py_name == "pop" && c_name == "list_pop" {
+                        // POP PATTERN: Python list.pop() + C list_pop() → Rust Vec::pop()
+                        return self.unify_pop_pattern(py_args);
+                    }
+                    if py_name == "insert" && c_name == "list_insert" {
+                        // INSERT PATTERN: Python list.insert() + C list_insert() → Rust Vec::insert()
+                        return self.unify_insert_pattern(py_args);
+                    }
+                    if py_name == "extend" && c_name == "list_extend" {
+                        // EXTEND PATTERN: Python list.extend() + C list_extend() → Rust Vec::extend()
+                        return self.unify_extend_pattern(py_args);
+                    }
                 }
                 bail!("Cannot unify Python call with C function")
             }
@@ -462,6 +480,72 @@ impl Unifier {
                 python_node: None,
                 c_node: None,
                 pattern: UnificationPattern::ClearPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `pop()` pattern (Python list.pop + C `list_pop` → Rust `Vec::pop`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_pop_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "Vec::pop".to_owned(),
+            args: vec![], // Simplified for now
+            inferred_type: Type::Rust(crate::types::RustType::Option(Box::new(Type::Unknown))),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::PopPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `insert()` pattern (Python list.insert + C `list_insert` → Rust `Vec::insert`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_insert_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "Vec::insert".to_owned(),
+            args: vec![], // Simplified for now
+            inferred_type: Type::Rust(crate::types::RustType::Unit),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::InsertPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `extend()` pattern (Python list.extend + C `list_extend` → Rust `Vec::extend`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_extend_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "Vec::extend".to_owned(),
+            args: vec![], // Simplified for now
+            inferred_type: Type::Rust(crate::types::RustType::Unit),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::ExtendPattern,
                 boundary_eliminated: false,
             }),
             meta: Metadata::new(),
