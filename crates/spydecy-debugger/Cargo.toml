@@ -11,9 +11,10 @@ keywords = ["debugger", "transpiler", "introspection"]
 categories = ["compilers", "development-tools::debugging"]
 
 [dependencies]
-# HIR and Python parser dependencies
+# HIR and parser dependencies
 spydecy-hir = { version = "0.2.0", path = "../spydecy-hir" }
 spydecy-python = { version = "0.2.0", path = "../spydecy-python" }
+spydecy-c = { version = "0.2.0", path = "../spydecy-c" }
 
 # Error handling
 anyhow = "1.0"

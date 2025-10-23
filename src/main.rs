@@ -273,13 +273,31 @@ fn debug_command(file: &str, visualize: bool) -> Result<()> {
     tracing::info!("Debugging: {} (visualize: {})", file, visualize);
 
     if visualize {
-        // Visualize Python AST
-        let output = spydecy_debugger::visualize_python_ast(Path::new(file))
-            .context("Failed to visualize AST")?;
+        let path = Path::new(file);
+
+        // Determine file type by extension
+        let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
+
+        let output = match extension {
+            "py" => {
+                // Visualize Python AST
+                spydecy_debugger::visualize_python_ast(path)
+                    .context("Failed to visualize Python AST")?
+            }
+            "c" | "h" => {
+                // Visualize C AST with CPython annotations
+                spydecy_debugger::visualize_c_ast(path).context("Failed to visualize C AST")?
+            }
+            _ => {
+                anyhow::bail!("Unsupported file extension: '{extension}'. Supported: .py, .c, .h");
+            }
+        };
+
         println!("{output}");
     } else {
         eprintln!("ℹ️  Use --visualize flag to see AST visualization");
         eprintln!("   Example: spydecy debug --visualize your_file.py");
+        eprintln!("   Example: spydecy debug --visualize your_file.c");
     }
 
     Ok(())

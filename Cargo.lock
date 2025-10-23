@@ -997,6 +997,7 @@ version = "0.2.0"
 dependencies = [
  "anyhow",
  "clang-sys",
+ "decy-parser",
  "proptest",
  "serde",
  "serde_json",
@@ -1025,6 +1026,7 @@ dependencies = [
  "colored",
  "serde",
  "serde_json",
+ "spydecy-c",
  "spydecy-hir",
  "spydecy-python",
  "tempfile",

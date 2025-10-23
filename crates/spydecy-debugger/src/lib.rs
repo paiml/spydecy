@@ -32,6 +32,15 @@ pub fn visualize_python_ast(file_path: &Path) -> Result<String> {
     visualize::visualize_python(file_path)
 }
 
+/// Visualize C AST with `CPython` API annotations for debugging
+///
+/// # Errors
+///
+/// Returns an error if the file cannot be read or parsed
+pub fn visualize_c_ast(file_path: &Path) -> Result<String> {
+    visualize::visualize_c(file_path)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -57,5 +66,25 @@ mod tests {
 
         let result = visualize_python_ast(temp_file.path());
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_visualize_c_simple_function() {
+        use std::io::Write;
+        use tempfile::Builder;
+
+        let mut temp_file = Builder::new().suffix(".c").tempfile().unwrap();
+        writeln!(temp_file, "int add(int a, int b) {{\n    return a + b;\n}}").unwrap();
+        temp_file.flush().unwrap(); // Ensure content is written
+
+        let result = visualize_c_ast(temp_file.path());
+        assert!(
+            result.is_ok(),
+            "Failed to visualize C: {:?}",
+            result.as_ref().err()
+        );
+        let output = result.unwrap();
+        assert!(output.contains("C AST Visualization"));
+        assert!(output.contains("FunctionDecl"));
     }
 }

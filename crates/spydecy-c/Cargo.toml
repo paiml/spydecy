@@ -9,7 +9,10 @@ license.workspace = true
 # HIR dependency
 spydecy-hir = { path = "../spydecy-hir" }
 
-# C parsing via clang-sys (following decy's approach)
+# C parsing - using decy's comprehensive parser
+decy-parser = { version = "0.2.0", path = "../../../decy/crates/decy-parser" }
+
+# Legacy C parsing via clang-sys (will be phased out)
 clang-sys = { version = "1.7", features = ["clang_3_9"] }
 
 # Error handling

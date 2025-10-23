@@ -28,6 +28,7 @@
 )]
 
 pub mod cpython;
+pub mod decy_adapter;
 pub mod hir_converter;
 pub mod parser;
 
@@ -35,12 +36,42 @@ use anyhow::Result;
 use spydecy_hir::c::CHIR;
 use std::path::Path;
 
-/// Parse C source code into HIR
+/// Parse C source code into HIR using decy-parser
 ///
 /// # Errors
 ///
 /// Returns an error if the C code cannot be parsed or converted to HIR
-pub fn parse_c(source: &str, filename: &str) -> Result<CHIR> {
+pub fn parse_c(source: &str, _filename: &str) -> Result<CHIR> {
+    // Prepend CPython type declarations for decy-parser compatibility
+    let cpython_types = r"
+typedef long Py_ssize_t;
+struct _object;
+typedef struct _object PyObject;
+struct PyListObject;
+typedef struct PyListObject PyListObject;
+struct PyDictObject;
+typedef struct PyDictObject PyDictObject;
+";
+    let enhanced_source = format!("{cpython_types}{source}");
+
+    // Use decy-parser for comprehensive C parsing
+    let decy_parser = decy_parser::CParser::new()?;
+    let decy_ast = decy_parser.parse(&enhanced_source)?;
+
+    // Convert decy AST to spydecy CAST
+    let cast = decy_adapter::convert_decy_ast_to_cast(&decy_ast)?;
+
+    // Convert CAST to HIR (existing pipeline)
+    hir_converter::convert_to_hir(&cast)
+}
+
+/// Parse C source code using legacy parser (for comparison/fallback)
+///
+/// # Errors
+///
+/// Returns an error if the C code cannot be parsed or converted to HIR
+#[allow(dead_code)]
+fn parse_c_legacy(source: &str, filename: &str) -> Result<CHIR> {
     let ast = parser::parse(source, filename)?;
     hir_converter::convert_to_hir(&ast)
 }
@@ -68,7 +99,11 @@ int add(int a, int b) {
 }
 ";
         let result = parse_c(source, "test.c");
-        assert!(result.is_ok());
+        assert!(
+            result.is_ok(),
+            "Failed to parse simple C: {:?}",
+            result.err()
+        );
     }
 
     #[test]
@@ -80,6 +115,10 @@ list_length(PyListObject *self) {
 }
 ";
         let result = parse_c(source, "listobject.c");
-        assert!(result.is_ok());
+        assert!(
+            result.is_ok(),
+            "Failed to parse CPython code: {:?}",
+            result.err()
+        );
     }
 }
