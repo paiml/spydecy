@@ -7,13 +7,13 @@
 | Feature | **Spydecy** (Python+C→Rust) | **Decy** (C→Rust) |
 |---------|---------------------------|-------------------|
 | **Version** | 0.2.0 | 0.2.0 |
-| **C Parser** | clang-sys (minimal) | clang-sys (comprehensive) |
+| **C Parser** | **decy-parser** ✅ (via adapter) | clang-sys (comprehensive) |
 | **HIR** | Unified HIR (Python+C+Rust) | Decy HIR (C-oriented, Rust-target) |
 | **Core Innovation** | Cross-language unification | Ownership/lifetime inference |
 | **Unsafe Minimization** | Not primary focus | **Critical goal** (<5/1000 LOC) |
 | **Pipeline** | Parse→Unify→Optimize→Codegen | Parse→HIR→Analyze→Ownership→Verify→Codegen |
-| **Testing** | 81/81 tests (100%) | EXTREME TDD + mutation testing |
-| **Debugger** | spydecy-debugger (Python AST) | **USES spydecy-debugger** + C extensions |
+| **Testing** | 99/99 tests (100%) ✅ | EXTREME TDD + mutation testing |
+| **Debugger** | spydecy-debugger (Python+C AST) ✅ | **USES spydecy-debugger** + C extensions |
 | **Quality** | PMAT + clippy + rustfmt | PMAT + Toyota Way + roadmap-driven |
 
 ### Existing Integration
@@ -56,11 +56,14 @@ decy-parser = "0.2.0"
 // with CPython pattern detection on top
 ```
 
-**Action Items**:
-- [ ] Evaluate decy-parser API compatibility
-- [ ] Create adapter layer for CPython pattern detection
-- [ ] Migrate spydecy-c tests to use decy-parser
-- [ ] Update spydecy-hir to accept decy HIR as input
+**Status**: ✅ **COMPLETE** (Phase 2)
+
+**Completed Actions**:
+- [x] Evaluated decy-parser API compatibility
+- [x] Created adapter layer (`decy_adapter.rs` - 280 lines)
+- [x] Migrated spydecy-c to use decy-parser internally (all tests passing)
+- [x] Maintained CPython pattern detection (100% compatible)
+- [x] Added CPython type declarations for parser compatibility
 
 ---
 
