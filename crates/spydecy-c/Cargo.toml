@@ -4,15 +4,17 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+description = "C AST parser for Spydecy transpiler with CPython API recognition"
+repository = "https://github.com/noahgift/spydecy"
+authors = ["Spydecy Team <team@spydecy.dev>"]
+keywords = ["parser", "c", "transpiler", "cpython"]
+categories = ["compilers", "parser-implementations"]
 
 [dependencies]
 # HIR dependency
-spydecy-hir = { path = "../spydecy-hir" }
+spydecy-hir = { version = "0.3.0", path = "../spydecy-hir" }
 
-# C parsing - using decy's comprehensive parser
-decy-parser = { version = "0.2.0", path = "../../../decy/crates/decy-parser" }
-
-# Legacy C parsing via clang-sys (will be phased out)
+# C parsing via clang-sys
 clang-sys = { version = "1.7", features = ["clang_3_9"] }
 
 # Error handling

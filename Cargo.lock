@@ -997,7 +997,6 @@ version = "0.3.0"
 dependencies = [
  "anyhow",
  "clang-sys",
- "decy-parser",
  "proptest",
  "serde",
  "serde_json",
