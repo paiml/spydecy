@@ -1,6 +1,6 @@
 [package]
 name = "spydecy-optimizer"
-version = "0.2.0"
+version = "0.3.0"
 edition.workspace = true
 license.workspace = true
 
@@ -8,7 +8,7 @@ license.workspace = true
 anyhow = "1.0"
 thiserror = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-spydecy-hir = { version = "0.2.0", path = "../spydecy-hir" }
+spydecy-hir = { version = "0.3.0", path = "../spydecy-hir" }
 
 [dev-dependencies]
 proptest = "1.5"

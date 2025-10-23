@@ -12,7 +12,7 @@ categories = ["compilers", "parser-implementations"]
 
 [dependencies]
 # HIR dependency
-spydecy-hir = { version = "0.2.0", path = "../spydecy-hir" }
+spydecy-hir = { version = "0.3.0", path = "../spydecy-hir" }
 
 # Python AST parsing via PyO3
 pyo3 = { version = "0.22", features = ["auto-initialize"] }

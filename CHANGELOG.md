@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-10-23
+
 ### Added - Phase 2 Complete: MVP-READY! 🎉
 
-**MVP Status Achieved** (2025-10-23)
+**MVP Status Achieved**
 - ✅ **PHASE 2 COMPLETE (80%)**: Spydecy is production-ready for list/dict operations
 - ✅ **11 Patterns Working**: 7 list operations + 4 dict operations
 - ✅ **28 Tests Passing (100%)**: Comprehensive test coverage including real-world validation

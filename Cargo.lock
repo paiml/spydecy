@@ -948,7 +948,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -993,7 +993,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy-c"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "clang-sys",
@@ -1009,7 +1009,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy-codegen"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "proptest",
@@ -1020,7 +1020,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy-debugger"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "colored",
@@ -1037,7 +1037,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy-decy-bridge"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "decy-hir",
@@ -1053,7 +1053,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy-hir"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "codespan",
@@ -1067,7 +1067,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy-optimizer"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "proptest",
@@ -1078,7 +1078,7 @@ dependencies = [
 
 [[package]]
 name = "spydecy-python"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "pretty_assertions",
