@@ -419,14 +419,14 @@ impl Unifier {
 
     /// Unify the `append()` pattern (Python list.append + C `PyList_Append` → Rust `Vec::push`)
     #[allow(clippy::unnecessary_wraps)]
-    fn unify_append_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+    fn unify_append_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
         let id = self.next_node_id();
 
         Ok(UnifiedHIR::Call {
             id,
             target_language: Language::Rust,
             callee: "Vec::push".to_owned(),
-            args: vec![], // Simplified for now
+            args: self.convert_args(args),
             inferred_type: Type::Rust(crate::types::RustType::Unit),
             source_language: Language::Python,
             cross_mapping: Some(CrossMapping {
@@ -441,14 +441,14 @@ impl Unifier {
 
     /// Unify the `dict.get()` pattern (Python dict.get + C `PyDict_GetItem` → Rust `HashMap::get`)
     #[allow(clippy::unnecessary_wraps)]
-    fn unify_dict_get_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+    fn unify_dict_get_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
         let id = self.next_node_id();
 
         Ok(UnifiedHIR::Call {
             id,
             target_language: Language::Rust,
             callee: "HashMap::get".to_owned(),
-            args: vec![], // Simplified for now
+            args: self.convert_args(args),
             inferred_type: Type::Rust(crate::types::RustType::Option(Box::new(Type::Unknown))),
             source_language: Language::Python,
             cross_mapping: Some(CrossMapping {
@@ -463,14 +463,14 @@ impl Unifier {
 
     /// Unify the `reverse()` pattern (Python list.reverse + C `list_reverse` → Rust `Vec::reverse`)
     #[allow(clippy::unnecessary_wraps)]
-    fn unify_reverse_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+    fn unify_reverse_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
         let id = self.next_node_id();
 
         Ok(UnifiedHIR::Call {
             id,
             target_language: Language::Rust,
             callee: "Vec::reverse".to_owned(),
-            args: vec![], // Simplified for now
+            args: self.convert_args(args),
             inferred_type: Type::Rust(crate::types::RustType::Unit),
             source_language: Language::Python,
             cross_mapping: Some(CrossMapping {
@@ -485,14 +485,14 @@ impl Unifier {
 
     /// Unify the `clear()` pattern (Python list.clear + C `list_clear` → Rust `Vec::clear`)
     #[allow(clippy::unnecessary_wraps)]
-    fn unify_clear_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+    fn unify_clear_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
         let id = self.next_node_id();
 
         Ok(UnifiedHIR::Call {
             id,
             target_language: Language::Rust,
             callee: "Vec::clear".to_owned(),
-            args: vec![], // Simplified for now
+            args: self.convert_args(args),
             inferred_type: Type::Rust(crate::types::RustType::Unit),
             source_language: Language::Python,
             cross_mapping: Some(CrossMapping {
@@ -507,14 +507,14 @@ impl Unifier {
 
     /// Unify the `pop()` pattern (Python list.pop + C `list_pop` → Rust `Vec::pop`)
     #[allow(clippy::unnecessary_wraps)]
-    fn unify_pop_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+    fn unify_pop_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
         let id = self.next_node_id();
 
         Ok(UnifiedHIR::Call {
             id,
             target_language: Language::Rust,
             callee: "Vec::pop".to_owned(),
-            args: vec![], // Simplified for now
+            args: self.convert_args(args),
             inferred_type: Type::Rust(crate::types::RustType::Option(Box::new(Type::Unknown))),
             source_language: Language::Python,
             cross_mapping: Some(CrossMapping {
@@ -529,14 +529,14 @@ impl Unifier {
 
     /// Unify the `insert()` pattern (Python list.insert + C `list_insert` → Rust `Vec::insert`)
     #[allow(clippy::unnecessary_wraps)]
-    fn unify_insert_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+    fn unify_insert_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
         let id = self.next_node_id();
 
         Ok(UnifiedHIR::Call {
             id,
             target_language: Language::Rust,
             callee: "Vec::insert".to_owned(),
-            args: vec![], // Simplified for now
+            args: self.convert_args(args),
             inferred_type: Type::Rust(crate::types::RustType::Unit),
             source_language: Language::Python,
             cross_mapping: Some(CrossMapping {
@@ -551,14 +551,14 @@ impl Unifier {
 
     /// Unify the `extend()` pattern (Python list.extend + C `list_extend` → Rust `Vec::extend`)
     #[allow(clippy::unnecessary_wraps)]
-    fn unify_extend_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+    fn unify_extend_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
         let id = self.next_node_id();
 
         Ok(UnifiedHIR::Call {
             id,
             target_language: Language::Rust,
             callee: "Vec::extend".to_owned(),
-            args: vec![], // Simplified for now
+            args: self.convert_args(args),
             inferred_type: Type::Rust(crate::types::RustType::Unit),
             source_language: Language::Python,
             cross_mapping: Some(CrossMapping {
@@ -573,14 +573,14 @@ impl Unifier {
 
     /// Unify the `dict.pop()` pattern (Python dict.pop + C `PyDict_DelItem` → Rust `HashMap::remove`)
     #[allow(clippy::unnecessary_wraps)]
-    fn unify_dict_pop_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+    fn unify_dict_pop_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
         let id = self.next_node_id();
 
         Ok(UnifiedHIR::Call {
             id,
             target_language: Language::Rust,
             callee: "HashMap::remove".to_owned(),
-            args: vec![], // Simplified for now
+            args: self.convert_args(args),
             inferred_type: Type::Rust(crate::types::RustType::Option(Box::new(Type::Unknown))),
             source_language: Language::Python,
             cross_mapping: Some(CrossMapping {
@@ -595,14 +595,14 @@ impl Unifier {
 
     /// Unify the `dict.clear()` pattern (Python dict.clear + C `PyDict_Clear` → Rust `HashMap::clear`)
     #[allow(clippy::unnecessary_wraps)]
-    fn unify_dict_clear_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+    fn unify_dict_clear_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
         let id = self.next_node_id();
 
         Ok(UnifiedHIR::Call {
             id,
             target_language: Language::Rust,
             callee: "HashMap::clear".to_owned(),
-            args: vec![], // Simplified for now
+            args: self.convert_args(args),
             inferred_type: Type::Rust(crate::types::RustType::Unit),
             source_language: Language::Python,
             cross_mapping: Some(CrossMapping {
@@ -617,14 +617,14 @@ impl Unifier {
 
     /// Unify the `dict.keys()` pattern (Python dict.keys + C `PyDict_Keys` → Rust `HashMap::keys`)
     #[allow(clippy::unnecessary_wraps)]
-    fn unify_dict_keys_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+    fn unify_dict_keys_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
         let id = self.next_node_id();
 
         Ok(UnifiedHIR::Call {
             id,
             target_language: Language::Rust,
             callee: "HashMap::keys".to_owned(),
-            args: vec![], // Simplified for now
+            args: self.convert_args(args),
             inferred_type: Type::Rust(crate::types::RustType::Custom("Keys".to_owned())),
             source_language: Language::Python,
             cross_mapping: Some(CrossMapping {
