@@ -221,6 +221,8 @@ pub enum UnificationPattern {
     DictGetPattern,
     /// Python `list.reverse()` → C `list_reverse()` → Rust `Vec::reverse()`
     ReversePattern,
+    /// Python `list.clear()` → C `list_clear()` → Rust `Vec::clear()`
+    ClearPattern,
     /// Custom pattern (extensible)
     Custom,
 }
@@ -340,6 +342,10 @@ impl Unifier {
                         // REVERSE PATTERN: Python list.reverse() + C list_reverse() → Rust Vec::reverse()
                         return self.unify_reverse_pattern(py_args);
                     }
+                    if py_name == "clear" && c_name == "list_clear" {
+                        // CLEAR PATTERN: Python list.clear() + C list_clear() → Rust Vec::clear()
+                        return self.unify_clear_pattern(py_args);
+                    }
                 }
                 bail!("Cannot unify Python call with C function")
             }
@@ -434,6 +440,28 @@ impl Unifier {
                 python_node: None,
                 c_node: None,
                 pattern: UnificationPattern::ReversePattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `clear()` pattern (Python list.clear + C `list_clear` → Rust `Vec::clear`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_clear_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "Vec::clear".to_owned(),
+            args: vec![], // Simplified for now
+            inferred_type: Type::Rust(crate::types::RustType::Unit),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::ClearPattern,
                 boundary_eliminated: false,
             }),
             meta: Metadata::new(),

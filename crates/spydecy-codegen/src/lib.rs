@@ -174,6 +174,10 @@ impl RustCodegen {
                 // Vec::reverse() becomes x.reverse()
                 "x.reverse()".to_owned()
             }
+            UnificationPattern::ClearPattern => {
+                // Vec::clear() becomes x.clear()
+                "x.clear()".to_owned()
+            }
             UnificationPattern::Custom => format!("{callee}()"),
         }
     }
