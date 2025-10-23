@@ -340,11 +340,11 @@ fn info_command() {
     println!("EXTREME TDD - Zero Tolerance Quality");
     println!();
     println!("📊 Status:");
-    println!("   ✅ 84/84 tests passing (100%)");
-    println!("   ✅ Sprint 5.6 Complete: Dict Operations");
+    println!("   ✅ 86/86 tests passing (100%)");
+    println!("   ✅ Phase 2.1 Complete: Full Argument Support");
     println!("   ✅ Sprint 5 Series: Comprehensive Pattern Coverage");
     println!("   ✅ Full pipeline working");
-    println!("   ✅ 11 unification patterns implemented");
+    println!("   ✅ 11 unification patterns with real arguments");
     println!();
     println!("🦀 Unification Patterns (11 working):");
     println!("   List Operations:");

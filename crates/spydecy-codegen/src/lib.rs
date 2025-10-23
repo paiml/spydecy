@@ -149,58 +149,76 @@ impl RustCodegen {
         Ok(output)
     }
 
+    /// Extract the receiver variable name from arguments
+    ///
+    /// Returns the name of the first Variable argument, or "x" as fallback
+    fn extract_receiver_name(args: &[UnifiedHIR]) -> String {
+        args.first()
+            .and_then(|arg| {
+                if let UnifiedHIR::Variable { name, .. } = arg {
+                    Some(name.clone())
+                } else {
+                    None
+                }
+            })
+            .unwrap_or_else(|| "x".to_owned())
+    }
+
     /// Generate an optimized call (post-boundary-elimination)
     #[allow(clippy::unnecessary_wraps)]
     fn generate_optimized_call(
         callee: &str,
-        _args: &[UnifiedHIR],
+        args: &[UnifiedHIR],
         pattern: UnificationPattern,
     ) -> String {
+        // Helper: Extract variable name from first argument
+        let receiver = Self::extract_receiver_name(args);
+
         // Generate idiomatic Rust based on the pattern
         match pattern {
             UnificationPattern::LenPattern => {
-                // Vec::len() becomes x.len()
-                "x.len()".to_owned()
+                // Vec::len() becomes <receiver>.len()
+                format!("{receiver}.len()")
             }
             UnificationPattern::AppendPattern => {
-                // Vec::push() becomes x.push(item)
-                "x.push(item)".to_owned()
+                // Vec::push() becomes <receiver>.push(item)
+                format!("{receiver}.push(item)")
             }
             UnificationPattern::DictGetPattern => {
-                // HashMap::get() becomes map.get(&key)
-                "map.get(&key)".to_owned()
+                // HashMap::get() becomes <receiver>.get(&key)
+                format!("{receiver}.get(&key)")
             }
             UnificationPattern::ReversePattern => {
-                // Vec::reverse() becomes x.reverse()
-                "x.reverse()".to_owned()
+                // Vec::reverse() becomes <receiver>.reverse()
+                format!("{receiver}.reverse()")
             }
             UnificationPattern::ClearPattern => {
-                // Vec::clear() becomes x.clear()
-                "x.clear()".to_owned()
+                // Vec::clear() becomes <receiver>.clear()
+                format!("{receiver}.clear()")
             }
             UnificationPattern::PopPattern => {
-                // Vec::pop() becomes x.pop()
-                "x.pop()".to_owned()
+                // Vec::pop() becomes <receiver>.pop()
+                format!("{receiver}.pop()")
             }
             UnificationPattern::InsertPattern => {
-                // Vec::insert() becomes x.insert(index, value)
-                "x.insert(index, value)".to_owned()
+                // Vec::insert() becomes <receiver>.insert(index, value)
+                format!("{receiver}.insert(index, value)")
             }
             UnificationPattern::ExtendPattern => {
-                // Vec::extend() becomes x.extend(iter)
-                "x.extend(iter)".to_owned()
+                // Vec::extend() becomes <receiver>.extend(iter)
+                format!("{receiver}.extend(iter)")
             }
             UnificationPattern::DictPopPattern => {
-                // HashMap::remove() becomes map.remove(&key)
-                "map.remove(&key)".to_owned()
+                // HashMap::remove() becomes <receiver>.remove(&key)
+                format!("{receiver}.remove(&key)")
             }
             UnificationPattern::DictClearPattern => {
-                // HashMap::clear() becomes map.clear()
-                "map.clear()".to_owned()
+                // HashMap::clear() becomes <receiver>.clear()
+                format!("{receiver}.clear()")
             }
             UnificationPattern::DictKeysPattern => {
-                // HashMap::keys() becomes map.keys()
-                "map.keys()".to_owned()
+                // HashMap::keys() becomes <receiver>.keys()
+                format!("{receiver}.keys()")
             }
             UnificationPattern::Custom => format!("{callee}()"),
         }

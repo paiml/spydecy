@@ -654,6 +654,7 @@ impl Unifier {
 
     /// Convert a single Python HIR node to Unified HIR
     /// Simplified for Phase 2.1 - handles common cases
+    #[allow(clippy::unnecessary_wraps)]
     fn convert_python_node(&mut self, node: &PythonHIR) -> Result<UnifiedHIR> {
         match node {
             PythonHIR::Variable { name, .. } => {
