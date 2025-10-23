@@ -190,6 +190,18 @@ impl RustCodegen {
                 // Vec::extend() becomes x.extend(iter)
                 "x.extend(iter)".to_owned()
             }
+            UnificationPattern::DictPopPattern => {
+                // HashMap::remove() becomes map.remove(&key)
+                "map.remove(&key)".to_owned()
+            }
+            UnificationPattern::DictClearPattern => {
+                // HashMap::clear() becomes map.clear()
+                "map.clear()".to_owned()
+            }
+            UnificationPattern::DictKeysPattern => {
+                // HashMap::keys() becomes map.keys()
+                "map.keys()".to_owned()
+            }
             UnificationPattern::Custom => format!("{callee}()"),
         }
     }

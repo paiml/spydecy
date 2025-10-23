@@ -25,6 +25,9 @@ fn create_sample_hir(pattern: UnificationPattern) -> UnifiedHIR {
         UnificationPattern::PopPattern => "Vec::pop",
         UnificationPattern::InsertPattern => "Vec::insert",
         UnificationPattern::ExtendPattern => "Vec::extend",
+        UnificationPattern::DictPopPattern => "HashMap::remove",
+        UnificationPattern::DictClearPattern => "HashMap::clear",
+        UnificationPattern::DictKeysPattern => "HashMap::keys",
         UnificationPattern::Custom => "custom",
     };
 

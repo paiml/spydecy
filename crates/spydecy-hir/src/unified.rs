@@ -229,6 +229,12 @@ pub enum UnificationPattern {
     InsertPattern,
     /// Python `list.extend()` → C `list_extend()` → Rust `Vec::extend()`
     ExtendPattern,
+    /// Python `dict.pop()` → C `PyDict_DelItem()` → Rust `HashMap::remove()`
+    DictPopPattern,
+    /// Python `dict.clear()` → C `PyDict_Clear()` → Rust `HashMap::clear()`
+    DictClearPattern,
+    /// Python `dict.keys()` → C `PyDict_Keys()` → Rust `HashMap::keys()`
+    DictKeysPattern,
     /// Custom pattern (extensible)
     Custom,
 }
@@ -363,6 +369,19 @@ impl Unifier {
                     if py_name == "extend" && c_name == "list_extend" {
                         // EXTEND PATTERN: Python list.extend() + C list_extend() → Rust Vec::extend()
                         return self.unify_extend_pattern(py_args);
+                    }
+                    // Dict operations
+                    if py_name == "dict_pop" && c_name == "PyDict_DelItem" {
+                        // DICT POP PATTERN: Python dict.pop() + C PyDict_DelItem() → Rust HashMap::remove()
+                        return self.unify_dict_pop_pattern(py_args);
+                    }
+                    if py_name == "dict_clear" && c_name == "PyDict_Clear" {
+                        // DICT CLEAR PATTERN: Python dict.clear() + C PyDict_Clear() → Rust HashMap::clear()
+                        return self.unify_dict_clear_pattern(py_args);
+                    }
+                    if py_name == "keys" && c_name == "PyDict_Keys" {
+                        // DICT KEYS PATTERN: Python dict.keys() + C PyDict_Keys() → Rust HashMap::keys()
+                        return self.unify_dict_keys_pattern(py_args);
                     }
                 }
                 bail!("Cannot unify Python call with C function")
@@ -546,6 +565,72 @@ impl Unifier {
                 python_node: None,
                 c_node: None,
                 pattern: UnificationPattern::ExtendPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `dict.pop()` pattern (Python dict.pop + C `PyDict_DelItem` → Rust `HashMap::remove`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_dict_pop_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "HashMap::remove".to_owned(),
+            args: vec![], // Simplified for now
+            inferred_type: Type::Rust(crate::types::RustType::Option(Box::new(Type::Unknown))),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::DictPopPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `dict.clear()` pattern (Python dict.clear + C `PyDict_Clear` → Rust `HashMap::clear`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_dict_clear_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "HashMap::clear".to_owned(),
+            args: vec![], // Simplified for now
+            inferred_type: Type::Rust(crate::types::RustType::Unit),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::DictClearPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `dict.keys()` pattern (Python dict.keys + C `PyDict_Keys` → Rust `HashMap::keys`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_dict_keys_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "HashMap::keys".to_owned(),
+            args: vec![], // Simplified for now
+            inferred_type: Type::Rust(crate::types::RustType::Custom("Keys".to_owned())),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::DictKeysPattern,
                 boundary_eliminated: false,
             }),
             meta: Metadata::new(),
