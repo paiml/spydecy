@@ -219,6 +219,8 @@ pub enum UnificationPattern {
     AppendPattern,
     /// Python `dict.get()` → C `PyDict_GetItem()` → Rust `HashMap::get()`
     DictGetPattern,
+    /// Python `list.reverse()` → C `list_reverse()` → Rust `Vec::reverse()`
+    ReversePattern,
     /// Custom pattern (extensible)
     Custom,
 }
@@ -334,6 +336,10 @@ impl Unifier {
                         // DICT.GET PATTERN: Python dict.get() + C PyDict_GetItem() → Rust HashMap::get()
                         return self.unify_dict_get_pattern(py_args);
                     }
+                    if py_name == "reverse" && c_name == "list_reverse" {
+                        // REVERSE PATTERN: Python list.reverse() + C list_reverse() → Rust Vec::reverse()
+                        return self.unify_reverse_pattern(py_args);
+                    }
                 }
                 bail!("Cannot unify Python call with C function")
             }
@@ -406,6 +412,28 @@ impl Unifier {
                 python_node: None,
                 c_node: None,
                 pattern: UnificationPattern::DictGetPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `reverse()` pattern (Python list.reverse + C `list_reverse` → Rust `Vec::reverse`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_reverse_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "Vec::reverse".to_owned(),
+            args: vec![], // Simplified for now
+            inferred_type: Type::Rust(crate::types::RustType::Unit),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::ReversePattern,
                 boundary_eliminated: false,
             }),
             meta: Metadata::new(),

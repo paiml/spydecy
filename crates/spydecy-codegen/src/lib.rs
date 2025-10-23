@@ -170,6 +170,10 @@ impl RustCodegen {
                 // HashMap::get() becomes map.get(&key)
                 "map.get(&key)".to_owned()
             }
+            UnificationPattern::ReversePattern => {
+                // Vec::reverse() becomes x.reverse()
+                "x.reverse()".to_owned()
+            }
             UnificationPattern::Custom => format!("{callee}()"),
         }
     }
