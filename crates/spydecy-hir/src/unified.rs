@@ -394,14 +394,14 @@ impl Unifier {
 
     /// Unify the `len()` pattern (from Sprint 0)
     #[allow(clippy::unnecessary_wraps)]
-    fn unify_len_pattern(&mut self, _args: &[PythonHIR]) -> Result<UnifiedHIR> {
+    fn unify_len_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
         let id = self.next_node_id();
 
         Ok(UnifiedHIR::Call {
             id,
             target_language: Language::Rust,
             callee: "Vec::len".to_owned(),
-            args: vec![], // Simplified for now
+            args: self.convert_args(args), // Phase 2.1: Real arguments!
             inferred_type: Type::Rust(crate::types::RustType::Int {
                 bits: crate::types::IntSize::ISize,
                 signed: false,
@@ -642,6 +642,39 @@ impl Unifier {
         let id = NodeId::new(self.next_id);
         self.next_id += 1;
         id
+    }
+
+    /// Convert Python HIR arguments to Unified HIR
+    /// This is a simplified conversion for Phase 2.1
+    fn convert_args(&mut self, args: &[PythonHIR]) -> Vec<UnifiedHIR> {
+        args.iter()
+            .filter_map(|arg| self.convert_python_node(arg).ok())
+            .collect()
+    }
+
+    /// Convert a single Python HIR node to Unified HIR
+    /// Simplified for Phase 2.1 - handles common cases
+    fn convert_python_node(&mut self, node: &PythonHIR) -> Result<UnifiedHIR> {
+        match node {
+            PythonHIR::Variable { name, .. } => {
+                let id = self.next_node_id();
+                Ok(UnifiedHIR::Variable {
+                    id,
+                    name: name.clone(),
+                    var_type: Type::Unknown, // Type inference to be added later
+                    source_language: Language::Python,
+                    meta: Metadata::new(),
+                })
+            }
+            // For now, just handle variables - expand later
+            _ => Ok(UnifiedHIR::Variable {
+                id: self.next_node_id(),
+                name: "arg".to_owned(),
+                var_type: Type::Unknown,
+                source_language: Language::Python,
+                meta: Metadata::new(),
+            }),
+        }
     }
 }
 
