@@ -380,7 +380,13 @@ mod tests {
             id: NodeId::new(1),
             target_language: Language::Rust,
             callee: "HashMap::get".to_owned(),
-            args: vec![],
+            args: vec![UnifiedHIR::Variable {
+                id: NodeId::new(2),
+                name: "map".to_owned(),
+                var_type: Type::Unknown,
+                source_language: Language::Python,
+                meta: Metadata::new(),
+            }],
             inferred_type: Type::Unknown,
             source_language: Language::Python,
             cross_mapping: Some(CrossMapping {

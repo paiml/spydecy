@@ -14,13 +14,13 @@ use std::collections::HashMap;
 // =============================================================================
 
 /// Hand-written Rust: Vec::len()
-fn handwritten_vec_len(data: &Vec<i32>) -> usize {
+fn handwritten_vec_len(data: &[i32]) -> usize {
     data.len()
 }
 
 /// Spydecy-generated pattern: Vec::len()
 /// Generated from: Python `len(my_list)` + C `list_length()`
-fn spydecy_generated_vec_len(data: &Vec<i32>) -> usize {
+fn spydecy_generated_vec_len(data: &[i32]) -> usize {
     data.len() // Spydecy generates identical code
 }
 
@@ -30,13 +30,9 @@ fn benchmark_vec_len(c: &mut Criterion) {
     for size in [10, 100, 1000, 10_000].iter() {
         let data: Vec<i32> = (0..*size).collect();
 
-        group.bench_with_input(
-            BenchmarkId::new("hand_written", size),
-            &data,
-            |b, data| {
-                b.iter(|| black_box(handwritten_vec_len(data)));
-            },
-        );
+        group.bench_with_input(BenchmarkId::new("hand_written", size), &data, |b, data| {
+            b.iter(|| black_box(handwritten_vec_len(data)));
+        });
 
         group.bench_with_input(
             BenchmarkId::new("spydecy_generated", size),
@@ -106,13 +102,13 @@ fn benchmark_vec_push(c: &mut Criterion) {
 // =============================================================================
 
 /// Hand-written Rust: Vec::reverse()
-fn handwritten_vec_reverse(data: &mut Vec<i32>) {
+fn handwritten_vec_reverse(data: &mut [i32]) {
     data.reverse();
 }
 
 /// Spydecy-generated pattern: Vec::reverse()
 /// Generated from: Python `list.reverse()` + C `list_reverse()`
-fn spydecy_generated_vec_reverse(data: &mut Vec<i32>) {
+fn spydecy_generated_vec_reverse(data: &mut [i32]) {
     data.reverse(); // Spydecy generates identical code
 }
 
@@ -122,17 +118,13 @@ fn benchmark_vec_reverse(c: &mut Criterion) {
     for size in [10, 100, 1000, 10_000].iter() {
         let data: Vec<i32> = (0..*size).collect();
 
-        group.bench_with_input(
-            BenchmarkId::new("hand_written", size),
-            &data,
-            |b, data| {
-                b.iter(|| {
-                    let mut clone = data.clone();
-                    handwritten_vec_reverse(&mut clone);
-                    black_box(clone);
-                });
-            },
-        );
+        group.bench_with_input(BenchmarkId::new("hand_written", size), &data, |b, data| {
+            b.iter(|| {
+                let mut clone = data.clone();
+                handwritten_vec_reverse(&mut clone);
+                black_box(clone);
+            });
+        });
 
         group.bench_with_input(
             BenchmarkId::new("spydecy_generated", size),
@@ -161,10 +153,7 @@ fn handwritten_hashmap_get<'a>(map: &'a HashMap<String, i32>, key: &str) -> Opti
 
 /// Spydecy-generated pattern: HashMap::get()
 /// Generated from: Python `dict.get()` + C `PyDict_GetItem()`
-fn spydecy_generated_hashmap_get<'a>(
-    map: &'a HashMap<String, i32>,
-    key: &str,
-) -> Option<&'a i32> {
+fn spydecy_generated_hashmap_get<'a>(map: &'a HashMap<String, i32>, key: &str) -> Option<&'a i32> {
     map.get(key) // Spydecy generates identical code
 }
 
@@ -208,17 +197,13 @@ fn benchmark_vec_clear(c: &mut Criterion) {
     let mut group = c.benchmark_group("vec_clear");
 
     for size in [100, 1000, 10_000].iter() {
-        group.bench_with_input(
-            BenchmarkId::new("hand_written", size),
-            size,
-            |b, &size| {
-                b.iter(|| {
-                    let mut data: Vec<i32> = (0..size).collect();
-                    data.clear();
-                    black_box(data);
-                });
-            },
-        );
+        group.bench_with_input(BenchmarkId::new("hand_written", size), size, |b, &size| {
+            b.iter(|| {
+                let mut data: Vec<i32> = (0..size).collect();
+                data.clear();
+                black_box(data);
+            });
+        });
 
         group.bench_with_input(
             BenchmarkId::new("spydecy_generated", size),
@@ -243,17 +228,13 @@ fn benchmark_vec_pop(c: &mut Criterion) {
     for size in [100, 1000].iter() {
         let data: Vec<i32> = (0..*size).collect();
 
-        group.bench_with_input(
-            BenchmarkId::new("hand_written", size),
-            &data,
-            |b, data| {
-                b.iter(|| {
-                    let mut clone = data.clone();
-                    while clone.pop().is_some() {}
-                    black_box(clone);
-                });
-            },
-        );
+        group.bench_with_input(BenchmarkId::new("hand_written", size), &data, |b, data| {
+            b.iter(|| {
+                let mut clone = data.clone();
+                while clone.pop().is_some() {}
+                black_box(clone);
+            });
+        });
 
         group.bench_with_input(
             BenchmarkId::new("spydecy_generated", size),

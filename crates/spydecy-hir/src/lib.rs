@@ -46,6 +46,10 @@
 
 #![warn(missing_docs, clippy::all, clippy::pedantic)]
 #![deny(unsafe_code)]
+#![allow(clippy::module_name_repetitions)]
+#![allow(clippy::unnested_or_patterns)]
+#![allow(clippy::uninlined_format_args)]
+#![allow(clippy::single_match_else)]
 
 pub mod c;
 pub mod error;

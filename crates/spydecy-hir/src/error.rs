@@ -57,6 +57,7 @@ pub struct PatternSuggestion {
 
 impl PatternSuggestion {
     /// Create a new pattern suggestion
+    #[must_use]
     pub const fn new(
         pattern: UnificationPattern,
         python_fn: &'static str,
@@ -73,6 +74,7 @@ impl PatternSuggestion {
 }
 
 /// Get all supported pattern suggestions
+#[must_use]
 pub fn all_patterns() -> Vec<PatternSuggestion> {
     vec![
         PatternSuggestion::new(
@@ -145,6 +147,7 @@ pub fn all_patterns() -> Vec<PatternSuggestion> {
 }
 
 /// Find similar patterns based on function names
+#[must_use]
 pub fn find_similar_patterns(python_fn: &str, c_fn: &str) -> Vec<PatternSuggestion> {
     let all = all_patterns();
     let mut suggestions = Vec::new();
@@ -226,15 +229,24 @@ impl fmt::Display for UnificationError {
                     python_kind, c_kind
                 )?;
                 writeln!(f)?;
-                writeln!(f, "💡 Spydecy requires both nodes to be callable functions.")?;
-                writeln!(f, "   Ensure your Python and C code represent the same operation.")?;
+                writeln!(
+                    f,
+                    "💡 Spydecy requires both nodes to be callable functions."
+                )?;
+                writeln!(
+                    f,
+                    "   Ensure your Python and C code represent the same operation."
+                )?;
                 Ok(())
             }
 
             Self::UnsupportedPython { node_kind } => {
                 writeln!(f, "❌ Unsupported Python HIR node: {}", node_kind)?;
                 writeln!(f)?;
-                writeln!(f, "💡 This Python construct is not yet supported by Spydecy.")?;
+                writeln!(
+                    f,
+                    "💡 This Python construct is not yet supported by Spydecy."
+                )?;
                 writeln!(f, "   Supported: function calls to known operations.")?;
                 Ok(())
             }
@@ -253,23 +265,32 @@ impl fmt::Display for UnificationError {
 impl std::error::Error for UnificationError {}
 
 /// Helper to extract function name from Python HIR
+#[must_use]
 pub fn extract_python_fn_name(python: &PythonHIR) -> String {
     match python {
         PythonHIR::Call { callee, .. } => match callee.as_ref() {
             PythonHIR::Variable { name, .. } => name.clone(),
             _ => "<complex expression>".to_owned(),
         },
-        PythonHIR::Variable { name, .. } => name.clone(),
-        PythonHIR::Function { name, .. } => name.clone(),
-        _ => format!("{:?}", python).split('{').next().unwrap_or("Unknown").to_owned(),
+        PythonHIR::Variable { name, .. } | PythonHIR::Function { name, .. } => name.clone(),
+        _ => format!("{:?}", python)
+            .split('{')
+            .next()
+            .unwrap_or("Unknown")
+            .to_owned(),
     }
 }
 
 /// Helper to extract function name from C HIR
+#[must_use]
 pub fn extract_c_fn_name(c: &CHIR) -> String {
     match c {
         CHIR::Function { name, .. } => name.clone(),
-        _ => format!("{:?}", c).split('{').next().unwrap_or("Unknown").to_owned(),
+        _ => format!("{:?}", c)
+            .split('{')
+            .next()
+            .unwrap_or("Unknown")
+            .to_owned(),
     }
 }
 
@@ -295,9 +316,7 @@ mod tests {
         let suggestions = find_similar_patterns("append", "PyList");
         assert!(!suggestions.is_empty());
         // Should find append pattern
-        assert!(suggestions
-            .iter()
-            .any(|s| s.python_fn.contains("append")));
+        assert!(suggestions.iter().any(|s| s.python_fn.contains("append")));
     }
 
     #[test]

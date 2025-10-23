@@ -152,7 +152,10 @@ static int some_function(void) {
     let mut unifier = Unifier::new();
     let result = unifier.unify(&python_literal, &c_func);
 
-    assert!(result.is_err(), "Should fail to unify literal with function");
+    assert!(
+        result.is_err(),
+        "Should fail to unify literal with function"
+    );
 
     let error_msg = result.unwrap_err().to_string();
 
@@ -166,7 +169,9 @@ static int some_function(void) {
 
 // Helper functions
 
-fn extract_python_call(python_hir: spydecy_hir::python::PythonHIR) -> spydecy_hir::python::PythonHIR {
+fn extract_python_call(
+    python_hir: spydecy_hir::python::PythonHIR,
+) -> spydecy_hir::python::PythonHIR {
     use spydecy_hir::python::PythonHIR;
 
     if let PythonHIR::Module { body, .. } = python_hir {

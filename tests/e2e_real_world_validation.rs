@@ -166,8 +166,8 @@ static void* list_pop(void) {
 }
 "#;
 
-    let rust_code = run_full_pipeline(python_source, c_source)
-        .expect("Should generate Rust code for log pop");
+    let rust_code =
+        run_full_pipeline(python_source, c_source).expect("Should generate Rust code for log pop");
 
     assert!(
         rust_code.contains("log_entries.pop()"),
@@ -210,7 +210,7 @@ static void {}(void) {{
         );
 
         let rust_code = run_full_pipeline(&python_source, &c_source)
-            .expect(&format!("Should generate for {} + {}", py_fn, c_fn));
+            .unwrap_or_else(|_| panic!("Should generate for {} + {}", py_fn, c_fn));
 
         // Verify no unsafe code
         assert!(
@@ -247,14 +247,16 @@ static size_t list_length(void) {
 }
 "#;
 
-    let rust_code = run_full_pipeline(python_source, c_source)
-        .expect("Should generate Rust code");
+    let rust_code = run_full_pipeline(python_source, c_source).expect("Should generate Rust code");
 
     // Verify generated code is idiomatic Rust
     assert!(rust_code.contains("items"));
     assert!(rust_code.contains(".len()"));
     assert!(!rust_code.contains("/* Unsupported"));
-    assert!(!rust_code.contains("unsafe"), "Should not contain unsafe code");
+    assert!(
+        !rust_code.contains("unsafe"),
+        "Should not contain unsafe code"
+    );
 
     // Verify it uses the actual variable name from source
     assert!(
