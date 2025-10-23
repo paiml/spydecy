@@ -22,8 +22,15 @@
 //!
 //! These patterns can be extended via the Pluggable C-API Architecture.
 
-use crate::{c::CHIR, metadata::Metadata, python::PythonHIR, types::Type, Language, NodeId};
-use anyhow::{bail, Result};
+use crate::{
+    c::CHIR,
+    error::{extract_c_fn_name, extract_python_fn_name, find_similar_patterns, UnificationError},
+    metadata::Metadata,
+    python::PythonHIR,
+    types::Type,
+    Language, NodeId,
+};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 /// Unified HIR node - combines Python and C into a single representation
@@ -384,11 +391,33 @@ impl Unifier {
                         return self.unify_dict_keys_pattern(py_args);
                     }
                 }
-                bail!("Cannot unify Python call with C function")
+
+                // No pattern found - generate helpful error message
+                let python_fn = if let PythonHIR::Variable { name, .. } = py_callee.as_ref() {
+                    name.clone()
+                } else {
+                    extract_python_fn_name(python)
+                };
+                let c_fn = c_name.clone();
+                let suggestions = find_similar_patterns(&python_fn, &c_fn);
+
+                Err(UnificationError::NoPatternMatch {
+                    python_fn,
+                    c_fn,
+                    suggestions,
+                })?
             }
 
-            // More patterns will be added here as we extend the unifier
-            _ => bail!("Cannot unify Python HIR {python:?} with C HIR {c:?}"),
+            // Incompatible node types
+            _ => {
+                let python_kind = extract_python_fn_name(python);
+                let c_kind = extract_c_fn_name(c);
+
+                Err(UnificationError::IncompatibleNodes {
+                    python_kind,
+                    c_kind,
+                })?
+            }
         }
     }
 

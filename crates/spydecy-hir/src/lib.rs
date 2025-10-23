@@ -48,6 +48,7 @@
 #![deny(unsafe_code)]
 
 pub mod c;
+pub mod error;
 pub mod metadata;
 pub mod python;
 pub mod types;
