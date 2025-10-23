@@ -15,6 +15,8 @@ categories = ["compilers", "development-tools::debugging"]
 spydecy-hir = { version = "0.2.0", path = "../spydecy-hir" }
 spydecy-python = { version = "0.2.0", path = "../spydecy-python" }
 spydecy-c = { version = "0.2.0", path = "../spydecy-c" }
+spydecy-optimizer = { version = "0.2.0", path = "../spydecy-optimizer" }
+spydecy-codegen = { version = "0.2.0", path = "../spydecy-codegen" }
 
 # Error handling
 anyhow = "1.0"

@@ -18,10 +18,15 @@
     clippy::uninlined_format_args
 )]
 
+pub mod commands;
+pub mod repl;
+pub mod state;
+pub mod stepper;
 pub mod visualize;
 
 use anyhow::Result;
-use std::path::Path;
+use state::TranspilationState;
+use std::path::{Path, PathBuf};
 
 /// Visualize Python AST for debugging
 ///
@@ -39,6 +44,17 @@ pub fn visualize_python_ast(file_path: &Path) -> Result<String> {
 /// Returns an error if the file cannot be read or parsed
 pub fn visualize_c_ast(file_path: &Path) -> Result<String> {
     visualize::visualize_c(file_path)
+}
+
+/// Start interactive step-through debugging session
+///
+/// # Errors
+///
+/// Returns an error if files cannot be read or REPL fails
+pub fn start_interactive_debugger(python_file: PathBuf, c_file: PathBuf) -> Result<()> {
+    let state = TranspilationState::new(python_file, c_file);
+    let stepper = stepper::Stepper::new(state);
+    repl::run_repl(stepper)
 }
 
 #[cfg(test)]

@@ -44,16 +44,34 @@ enum Commands {
 
     /// Start interactive debugger
     Debug {
-        /// Source file to debug
-        file: String,
-
-        /// Enable visualization
-        #[arg(short, long)]
-        visualize: bool,
+        /// Subcommand for debug mode
+        #[command(subcommand)]
+        mode: DebugMode,
     },
 
     /// Display version and status information
     Info,
+}
+
+/// Debug mode subcommands
+#[derive(Subcommand)]
+enum DebugMode {
+    /// Visualize AST of a file
+    Visualize {
+        /// Source file to visualize
+        file: PathBuf,
+    },
+
+    /// Step through transpilation interactively
+    Step {
+        /// Python source file
+        #[arg(long)]
+        python: PathBuf,
+
+        /// C source file
+        #[arg(long)]
+        c: PathBuf,
+    },
 }
 
 fn main() {
@@ -74,7 +92,10 @@ fn main() {
             output,
             verbose,
         } => compile_command(&python, &c, &output, verbose),
-        Commands::Debug { file, visualize } => debug_command(&file, visualize),
+        Commands::Debug { mode } => match mode {
+            DebugMode::Visualize { file } => debug_visualize_command(&file),
+            DebugMode::Step { python, c } => debug_step_command(python, c),
+        },
         Commands::Info => {
             info_command();
             Ok(())
@@ -268,39 +289,45 @@ fn compile_command(python: &Path, c: &Path, output: &Path, verbose: bool) -> Res
     Ok(())
 }
 
-/// Debug command - visualize AST
-fn debug_command(file: &str, visualize: bool) -> Result<()> {
-    tracing::info!("Debugging: {} (visualize: {})", file, visualize);
+/// Debug visualize command - visualize AST
+fn debug_visualize_command(file: &Path) -> Result<()> {
+    tracing::info!("Visualizing: {}", file.display());
 
-    if visualize {
-        let path = Path::new(file);
+    // Determine file type by extension
+    let extension = file.extension().and_then(|ext| ext.to_str()).unwrap_or("");
 
-        // Determine file type by extension
-        let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
+    let output = match extension {
+        "py" => {
+            // Visualize Python AST
+            spydecy_debugger::visualize_python_ast(file)
+                .context("Failed to visualize Python AST")?
+        }
+        "c" | "h" => {
+            // Visualize C AST with CPython annotations
+            spydecy_debugger::visualize_c_ast(file).context("Failed to visualize C AST")?
+        }
+        _ => {
+            anyhow::bail!("Unsupported file extension: '{extension}'. Supported: .py, .c, .h");
+        }
+    };
 
-        let output = match extension {
-            "py" => {
-                // Visualize Python AST
-                spydecy_debugger::visualize_python_ast(path)
-                    .context("Failed to visualize Python AST")?
-            }
-            "c" | "h" => {
-                // Visualize C AST with CPython annotations
-                spydecy_debugger::visualize_c_ast(path).context("Failed to visualize C AST")?
-            }
-            _ => {
-                anyhow::bail!("Unsupported file extension: '{extension}'. Supported: .py, .c, .h");
-            }
-        };
-
-        println!("{output}");
-    } else {
-        eprintln!("ℹ️  Use --visualize flag to see AST visualization");
-        eprintln!("   Example: spydecy debug --visualize your_file.py");
-        eprintln!("   Example: spydecy debug --visualize your_file.c");
-    }
-
+    println!("{output}");
     Ok(())
+}
+
+/// Debug step command - interactive step-through debugging
+fn debug_step_command(python: PathBuf, c: PathBuf) -> Result<()> {
+    tracing::info!(
+        "Starting interactive debugger: {} + {}",
+        python.display(),
+        c.display()
+    );
+
+    println!("🐛 Starting interactive debugger...\n");
+    println!("   Python: {}", python.display());
+    println!("   C:      {}", c.display());
+
+    spydecy_debugger::start_interactive_debugger(python, c)
 }
 
 /// Info command - display project status
@@ -314,10 +341,10 @@ fn info_command() {
     println!();
     println!("📊 Status:");
     println!("   ✅ 81/81 tests passing (100%)");
+    println!("   ✅ Sprint 4 Complete: Interactive Debugger");
     println!("   ✅ Full pipeline working");
     println!("   ✅ 3 core patterns implemented");
-    println!("   ✅ Optimizer functional");
-    println!("   ✅ Code generation working");
+    println!("   ✅ Step-through debugging functional");
     println!();
     println!("🦀 Core Patterns:");
     println!("   • len()       Python len() + C list_length()   → Vec::len()");
@@ -330,6 +357,12 @@ fn info_command() {
     println!("   Python + C     → UnifiedHIR   ✅");
     println!("   UnifiedHIR     → Optimized    ✅");
     println!("   Optimized      → Rust code    ✅");
+    println!();
+    println!("🐛 Interactive Debugger:");
+    println!("   spydecy debug step --python <file.py> --c <file.c>");
+    println!("   • Step through transpilation phases");
+    println!("   • Set breakpoints on optimizations");
+    println!("   • Visualize state at each step");
     println!();
     println!("Result: Pure Rust code with ZERO FFI, ZERO unsafe!");
     println!();
