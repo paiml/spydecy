@@ -33,6 +33,9 @@ fn create_sample_hir(pattern: UnificationPattern) -> UnifiedHIR {
         UnificationPattern::DictValuesPattern => "HashMap::values",
         UnificationPattern::ListCountPattern => "Vec::count",
         UnificationPattern::ListIndexPattern => "Vec::position",
+        UnificationPattern::DictItemsPattern => "HashMap::iter",
+        UnificationPattern::ListRemovePattern => "Vec::retain",
+        UnificationPattern::ListSortPattern => "Vec::sort",
         UnificationPattern::Custom => "custom",
     };
 

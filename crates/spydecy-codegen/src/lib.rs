@@ -240,6 +240,18 @@ impl RustCodegen {
                 // Vec::position() becomes <receiver>.iter().position(|&x| x == &item)
                 format!("{receiver}.iter().position(|&x| x == &item)")
             }
+            UnificationPattern::DictItemsPattern => {
+                // HashMap::iter() becomes <receiver>.iter()
+                format!("{receiver}.iter()")
+            }
+            UnificationPattern::ListRemovePattern => {
+                // Vec::retain() becomes <receiver>.retain(|&x| x != &item)
+                format!("{receiver}.retain(|&x| x != &item)")
+            }
+            UnificationPattern::ListSortPattern => {
+                // Vec::sort() becomes <receiver>.sort()
+                format!("{receiver}.sort()")
+            }
             UnificationPattern::Custom => format!("{callee}()"),
         }
     }

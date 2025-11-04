@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Common Patterns: Items, Remove, Sort ✨
+
+**New Pattern Support** (3 new patterns):
+- ✅ **Dict Items**: Python `dict.items()` + C `PyDict_Items()` → Rust `HashMap::iter()`
+- ✅ **List Remove**: Python `list.remove(x)` + C `list_remove()` → Rust `Vec::retain(|&x| x != &item)`
+- ✅ **List Sort**: Python `list.sort()` + C `list_sort()` → Rust `Vec::sort()`
+
+**Quality Metrics**:
+- 48 tests passing (up from 42) - 100% pass rate maintained
+- 19 patterns total (up from 16)
+- 3 new end-to-end tests (`e2e_common_patterns.rs`)
+- 3 new real-world validation scenarios:
+  - Configuration iteration (dict items)
+  - Event queue cleanup (list remove)
+  - Priority queue sorting (list sort)
+
+**Testing & Validation**:
+- Added `e2e_common_patterns.rs` with full pipeline tests
+- Real-world validation: `config_dict.iter()`, `event_queue.retain()`, `task_list.sort()`
+- Extreme TDD methodology: RED → GREEN → REFACTOR
+- Test assertions updated to expect idiomatic Rust patterns
+
+**Technical Details**:
+- Pattern matching in `unified.rs`
+- Code generation in `codegen.rs` with idiomatic Rust
+- `list.remove(x)` generates `Vec::retain(|&x| x != &item)` (Rust idiom for removal)
+- `dict.items()` generates `HashMap::iter()` (lazy iterator)
+- `list.sort()` generates `Vec::sort()` (in-place sorting)
+- Generated code uses actual variable names (e.g., `config_dict`, `event_queue`, `task_list`)
+
 ### Added - Advanced Patterns: Values, Count, Index ✨
 
 **New Pattern Support** (3 new patterns):

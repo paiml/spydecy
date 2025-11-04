@@ -252,6 +252,12 @@ pub enum UnificationPattern {
     ListCountPattern,
     /// Python `list.index(x)` → C `list_index()` → Rust `Vec::iter().position()`
     ListIndexPattern,
+    /// Python `dict.items()` → C `PyDict_Items()` → Rust `HashMap::iter()`
+    DictItemsPattern,
+    /// Python `list.remove(x)` → C `list_remove()` → Rust `Vec::retain()`
+    ListRemovePattern,
+    /// Python `list.sort()` → C `list_sort()` → Rust `Vec::sort()`
+    ListSortPattern,
     /// Custom pattern (extensible)
     Custom,
 }
@@ -419,6 +425,18 @@ impl Unifier {
                     if py_name == "index" && c_name == "list_index" {
                         // LIST INDEX PATTERN: Python list.index(x) + C list_index() → Rust Vec::iter().position()
                         return self.unify_list_index_pattern(py_args);
+                    }
+                    if py_name == "dict_items" && c_name == "PyDict_Items" {
+                        // DICT ITEMS PATTERN: Python dict.items() + C PyDict_Items() → Rust HashMap::iter()
+                        return self.unify_dict_items_pattern(py_args);
+                    }
+                    if py_name == "remove" && c_name == "list_remove" {
+                        // LIST REMOVE PATTERN: Python list.remove(x) + C list_remove() → Rust Vec::retain()
+                        return self.unify_list_remove_pattern(py_args);
+                    }
+                    if py_name == "sort" && c_name == "list_sort" {
+                        // LIST SORT PATTERN: Python list.sort() + C list_sort() → Rust Vec::sort()
+                        return self.unify_list_sort_pattern(py_args);
                     }
                 }
 
@@ -808,6 +826,72 @@ impl Unifier {
                 python_node: None,
                 c_node: None,
                 pattern: UnificationPattern::ListIndexPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `dict.items()` pattern (Python dict.items + C `PyDict_Items` → Rust `HashMap::iter`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_dict_items_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "HashMap::iter".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::Custom("Iter".to_owned())),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::DictItemsPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `list.remove()` pattern (Python list.remove + C `list_remove` → Rust `Vec::retain`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_list_remove_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "Vec::retain".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::Unit),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::ListRemovePattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `list.sort()` pattern (Python list.sort + C `list_sort` → Rust `Vec::sort`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_list_sort_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "Vec::sort".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::Unit),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::ListSortPattern,
                 boundary_eliminated: false,
             }),
             meta: Metadata::new(),
