@@ -264,6 +264,12 @@ pub enum UnificationPattern {
     DictCopyPattern,
     /// Python `dict.setdefault()` → C `dict_setdefault()` → Rust `HashMap::entry().or_insert()`
     DictSetDefaultPattern,
+    /// Python `dict.update()` → C `dict_update()` → Rust `HashMap::extend()`
+    DictUpdatePattern,
+    /// Python `min(list)` → C `list_min()` → Rust `Vec::iter().min()`
+    ListMinPattern,
+    /// Python `max(list)` → C `list_max()` → Rust `Vec::iter().max()`
+    ListMaxPattern,
     /// Custom pattern (extensible)
     Custom,
 }
@@ -353,6 +359,7 @@ impl Unifier {
     ///
     /// Returns an error if the Python and C HIR nodes cannot be unified
     /// (i.e., no known pattern matches the combination).
+    #[allow(clippy::too_many_lines)]
     pub fn unify(&mut self, python: &PythonHIR, c: &CHIR) -> Result<UnifiedHIR> {
         // Pattern matching for known Python-C relationships
         match (python, c) {
@@ -455,6 +462,18 @@ impl Unifier {
                     if py_name == "setdefault" && c_name == "dict_setdefault" {
                         // DICT SETDEFAULT PATTERN: Python dict.setdefault() + C dict_setdefault() → Rust HashMap::entry().or_insert()
                         return self.unify_dict_setdefault_pattern(py_args);
+                    }
+                    if py_name == "update" && c_name == "dict_update" {
+                        // DICT UPDATE PATTERN: Python dict.update() + C dict_update() → Rust HashMap::extend()
+                        return self.unify_dict_update_pattern(py_args);
+                    }
+                    if py_name == "min_value" && c_name == "list_min" {
+                        // LIST MIN PATTERN: Python min(list) + C list_min() → Rust Vec::iter().min()
+                        return self.unify_list_min_pattern(py_args);
+                    }
+                    if py_name == "max_value" && c_name == "list_max" {
+                        // LIST MAX PATTERN: Python max(list) + C list_max() → Rust Vec::iter().max()
+                        return self.unify_list_max_pattern(py_args);
                     }
                 }
 
@@ -982,6 +1001,72 @@ impl Unifier {
                 python_node: None,
                 c_node: None,
                 pattern: UnificationPattern::DictSetDefaultPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `dict.update()` pattern (Python dict.update + C `dict_update` → Rust `HashMap::extend`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_dict_update_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "HashMap::extend".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::Unit),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::DictUpdatePattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `list.min()` pattern (Python min(list) + C `list_min` → Rust `Vec::iter().min()`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_list_min_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "Vec::min".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::Option(Box::new(Type::Unknown))),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::ListMinPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `list.max()` pattern (Python max(list) + C `list_max` → Rust `Vec::iter().max()`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_list_max_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "Vec::max".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::Option(Box::new(Type::Unknown))),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::ListMaxPattern,
                 boundary_eliminated: false,
             }),
             meta: Metadata::new(),

@@ -264,6 +264,18 @@ impl RustCodegen {
                 // HashMap::entry().or_insert() becomes <receiver>.entry(key).or_insert(default)
                 format!("{receiver}.entry(key).or_insert(default)")
             }
+            UnificationPattern::DictUpdatePattern => {
+                // HashMap::extend() becomes <receiver>.extend(other)
+                format!("{receiver}.extend(other)")
+            }
+            UnificationPattern::ListMinPattern => {
+                // Vec::iter().min() becomes <receiver>.iter().min()
+                format!("{receiver}.iter().min()")
+            }
+            UnificationPattern::ListMaxPattern => {
+                // Vec::iter().max() becomes <receiver>.iter().max()
+                format!("{receiver}.iter().max()")
+            }
             UnificationPattern::Custom => format!("{callee}()"),
         }
     }

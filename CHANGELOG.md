@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Update & Aggregate Patterns ✨
+
+**New Pattern Support** (3 new patterns):
+- ✅ **Dict Update**: Python `dict.update()` + C `dict_update()` → Rust `HashMap::extend()`
+- ✅ **List Min**: Python `min(list)` + C `list_min()` → Rust `Vec::iter().min()`
+- ✅ **List Max**: Python `max(list)` + C `list_max()` → Rust `Vec::iter().max()`
+
+**Quality Metrics**:
+- 136 tests passing (up from 130) - 100% pass rate maintained
+- 25 patterns total (up from 22)
+- 3 new end-to-end tests (`e2e_update_min_max.rs`)
+- 3 new real-world validation scenarios:
+  - Config merge (dict update for overrides)
+  - Temperature monitoring (list min for readings)
+  - Game leaderboard (list max for scores)
+
+**Testing & Validation**:
+- Added `e2e_update_min_max.rs` with full pipeline tests
+- Real-world validation: `base_config.extend()`, `readings.iter().min()`, `scores.iter().max()`
+- Extreme TDD methodology: RED → GREEN → REFACTOR
+- All patterns generate idiomatic Rust code
+
+**Technical Details**:
+- Pattern matching in `unified.rs`
+- Code generation in `codegen.rs` with iterator chains
+- `dict.update()` generates `HashMap::extend()` (merges key-value pairs)
+- `min(list)` generates `Vec::iter().min()` (returns Option)
+- `max(list)` generates `Vec::iter().max()` (returns Option)
+- Added `#[allow(clippy::too_many_lines)]` for complex unify function
+- Generated code uses actual variable names (e.g., `base_config`, `readings`, `scores`)
+
 ### Added - Copy & SetDefault Patterns ✨
 
 **New Pattern Support** (3 new patterns):
