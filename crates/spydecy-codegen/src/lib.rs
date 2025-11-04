@@ -220,6 +220,14 @@ impl RustCodegen {
                 // HashMap::keys() becomes <receiver>.keys()
                 format!("{receiver}.keys()")
             }
+            UnificationPattern::ListContainsPattern => {
+                // Vec::contains() becomes <receiver>.contains(&item)
+                format!("{receiver}.contains(&item)")
+            }
+            UnificationPattern::DictContainsPattern => {
+                // HashMap::contains_key() becomes <receiver>.contains_key(&key)
+                format!("{receiver}.contains_key(&key)")
+            }
             UnificationPattern::Custom => format!("{callee}()"),
         }
     }

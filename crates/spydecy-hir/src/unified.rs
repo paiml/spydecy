@@ -242,6 +242,10 @@ pub enum UnificationPattern {
     DictClearPattern,
     /// Python `dict.keys()` → C `PyDict_Keys()` → Rust `HashMap::keys()`
     DictKeysPattern,
+    /// Python `x in list` → C `list_contains()` → Rust `Vec::contains()`
+    ListContainsPattern,
+    /// Python `x in dict` → C `dict_contains()` → Rust `HashMap::contains_key()`
+    DictContainsPattern,
     /// Custom pattern (extensible)
     Custom,
 }
@@ -389,6 +393,14 @@ impl Unifier {
                     if py_name == "keys" && c_name == "PyDict_Keys" {
                         // DICT KEYS PATTERN: Python dict.keys() + C PyDict_Keys() → Rust HashMap::keys()
                         return self.unify_dict_keys_pattern(py_args);
+                    }
+                    if py_name == "contains" && c_name == "list_contains" {
+                        // LIST CONTAINS PATTERN: Python 'x in list' + C list_contains() → Rust Vec::contains()
+                        return self.unify_list_contains_pattern(py_args);
+                    }
+                    if py_name == "dict_contains" && c_name == "dict_contains" {
+                        // DICT CONTAINS PATTERN: Python 'x in dict' + C dict_contains() → Rust HashMap::contains_key()
+                        return self.unify_dict_contains_pattern(py_args);
                     }
                 }
 
@@ -660,6 +672,50 @@ impl Unifier {
                 python_node: None,
                 c_node: None,
                 pattern: UnificationPattern::DictKeysPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `list.contains()` pattern (Python 'x in list' + C `list_contains` → Rust `Vec::contains`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_list_contains_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "Vec::contains".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::Bool),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::ListContainsPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `dict.contains_key()` pattern (Python 'x in dict' + C `dict_contains` → Rust `HashMap::contains_key`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_dict_contains_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "HashMap::contains_key".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::Bool),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::DictContainsPattern,
                 boundary_eliminated: false,
             }),
             meta: Metadata::new(),

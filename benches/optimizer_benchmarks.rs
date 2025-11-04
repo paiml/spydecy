@@ -28,6 +28,8 @@ fn create_sample_hir(pattern: UnificationPattern) -> UnifiedHIR {
         UnificationPattern::DictPopPattern => "HashMap::remove",
         UnificationPattern::DictClearPattern => "HashMap::clear",
         UnificationPattern::DictKeysPattern => "HashMap::keys",
+        UnificationPattern::ListContainsPattern => "Vec::contains",
+        UnificationPattern::DictContainsPattern => "HashMap::contains_key",
         UnificationPattern::Custom => "custom",
     };
 

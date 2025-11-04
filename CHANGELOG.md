@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Contains Patterns ✨
+
+**New Pattern Support** (2 new patterns):
+- ✅ **List Contains**: Python `x in list` + C `list_contains()` → Rust `Vec::contains()`
+- ✅ **Dict Contains**: Python `x in dict` + C `dict_contains()` → Rust `HashMap::contains_key()`
+
+**Quality Metrics**:
+- 36 tests passing (up from 28) - 100% pass rate maintained
+- 13 patterns total (up from 11)
+- 2 new end-to-end tests
+- 2 new real-world validation scenarios:
+  - User authorization checking (list contains)
+  - Feature flag checking (dict contains)
+
+**Testing & Validation**:
+- Added `e2e_contains.rs` with full pipeline tests
+- Real-world validation: `allowed_users.contains(&item)` and `feature_flags.contains_key(&key)`
+- Extreme TDD methodology: RED → GREEN → REFACTOR
+
+**Technical Details**:
+- Pattern matching in `unified.rs`
+- Code generation in `codegen.rs`
+- Unification logic supports both list and dict containment checks
+- Generated code uses actual variable names (e.g., `allowed_users`, `feature_flags`)
+
+---
+
 ## [0.3.0] - 2025-10-23
 
 ### Added - Phase 2 Complete: MVP-READY! 🎉

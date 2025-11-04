@@ -231,6 +231,71 @@ static void {}(void) {{
     }
 }
 
+/// Real-world scenario: Check if user exists in allowed list
+#[test]
+fn test_real_world_check_user_in_allowed_list() {
+    let python_source = r#"
+def check_user_allowed(allowed_users, user_id):
+    return contains(allowed_users, user_id)
+"#;
+
+    let c_source = r#"
+static int list_contains(PyListObject *a, PyObject *el) {
+    Py_ssize_t i;
+    for (i = 0; i < Py_SIZE(a); ++i) {
+        if (PyObject_RichCompareBool(el, PyList_GET_ITEM(a, i), Py_EQ))
+            return 1;
+    }
+    return 0;
+}
+"#;
+
+    let rust_code = run_full_pipeline(python_source, c_source)
+        .expect("Should generate Rust code for list contains");
+
+    // Verify realistic output
+    assert!(
+        rust_code.contains("allowed_users.contains(&item)"),
+        "Should use actual variable name 'allowed_users', not 'x'. Got: {}",
+        rust_code
+    );
+
+    println!("✅ Real-world list contains() validation:");
+    println!("{}", rust_code);
+}
+
+/// Real-world scenario: Check if feature flag is enabled
+#[test]
+fn test_real_world_check_feature_flag() {
+    let python_source = r#"
+def is_feature_enabled(feature_flags, flag_name):
+    return dict_contains(feature_flags, flag_name)
+"#;
+
+    let c_source = r#"
+static int dict_contains(PyDictObject *mp, PyObject *key) {
+    Py_hash_t hash;
+    hash = PyObject_Hash(key);
+    if (hash == -1)
+        return -1;
+    return 1;
+}
+"#;
+
+    let rust_code = run_full_pipeline(python_source, c_source)
+        .expect("Should generate Rust code for dict contains");
+
+    // Verify realistic output
+    assert!(
+        rust_code.contains("feature_flags.contains_key(&key)"),
+        "Should use actual variable name 'feature_flags', not 'x'. Got: {}",
+        rust_code
+    );
+
+    println!("✅ Real-world dict contains() validation:");
+    println!("{}", rust_code);
+}
+
 /// Validate generated code compiles
 #[test]
 fn test_generated_code_compiles() {
