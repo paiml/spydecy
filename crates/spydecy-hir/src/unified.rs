@@ -258,6 +258,12 @@ pub enum UnificationPattern {
     ListRemovePattern,
     /// Python `list.sort()` → C `list_sort()` → Rust `Vec::sort()`
     ListSortPattern,
+    /// Python `list.copy()` → C `list_copy()` → Rust `Vec::clone()`
+    ListCopyPattern,
+    /// Python `dict.copy()` → C `dict_copy()` → Rust `HashMap::clone()`
+    DictCopyPattern,
+    /// Python `dict.setdefault()` → C `dict_setdefault()` → Rust `HashMap::entry().or_insert()`
+    DictSetDefaultPattern,
     /// Custom pattern (extensible)
     Custom,
 }
@@ -437,6 +443,18 @@ impl Unifier {
                     if py_name == "sort" && c_name == "list_sort" {
                         // LIST SORT PATTERN: Python list.sort() + C list_sort() → Rust Vec::sort()
                         return self.unify_list_sort_pattern(py_args);
+                    }
+                    if py_name == "copy" && c_name == "list_copy" {
+                        // LIST COPY PATTERN: Python list.copy() + C list_copy() → Rust Vec::clone()
+                        return self.unify_list_copy_pattern(py_args);
+                    }
+                    if py_name == "dict_copy" && c_name == "dict_copy" {
+                        // DICT COPY PATTERN: Python dict.copy() + C dict_copy() → Rust HashMap::clone()
+                        return self.unify_dict_copy_pattern(py_args);
+                    }
+                    if py_name == "setdefault" && c_name == "dict_setdefault" {
+                        // DICT SETDEFAULT PATTERN: Python dict.setdefault() + C dict_setdefault() → Rust HashMap::entry().or_insert()
+                        return self.unify_dict_setdefault_pattern(py_args);
                     }
                 }
 
@@ -892,6 +910,78 @@ impl Unifier {
                 python_node: None,
                 c_node: None,
                 pattern: UnificationPattern::ListSortPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `list.copy()` pattern (Python list.copy + C `list_copy` → Rust `Vec::clone`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_list_copy_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "Vec::clone".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::Vec(Box::new(Type::Unknown))),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::ListCopyPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `dict.copy()` pattern (Python dict.copy + C `dict_copy` → Rust `HashMap::clone`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_dict_copy_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "HashMap::clone".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::HashMap {
+                key: Box::new(Type::Unknown),
+                value: Box::new(Type::Unknown),
+            }),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::DictCopyPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `dict.setdefault()` pattern (Python dict.setdefault + C `dict_setdefault` → Rust `HashMap::entry().or_insert()`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_dict_setdefault_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "HashMap::entry_or_insert".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::Reference {
+                mutable: true,
+                inner: Box::new(Type::Unknown),
+            }),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::DictSetDefaultPattern,
                 boundary_eliminated: false,
             }),
             meta: Metadata::new(),

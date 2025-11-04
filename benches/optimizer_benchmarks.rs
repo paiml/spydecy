@@ -36,6 +36,9 @@ fn create_sample_hir(pattern: UnificationPattern) -> UnifiedHIR {
         UnificationPattern::DictItemsPattern => "HashMap::iter",
         UnificationPattern::ListRemovePattern => "Vec::retain",
         UnificationPattern::ListSortPattern => "Vec::sort",
+        UnificationPattern::ListCopyPattern => "Vec::clone",
+        UnificationPattern::DictCopyPattern => "HashMap::clone",
+        UnificationPattern::DictSetDefaultPattern => "HashMap::entry_or_insert",
         UnificationPattern::Custom => "custom",
     };
 

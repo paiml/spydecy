@@ -252,6 +252,18 @@ impl RustCodegen {
                 // Vec::sort() becomes <receiver>.sort()
                 format!("{receiver}.sort()")
             }
+            UnificationPattern::ListCopyPattern => {
+                // Vec::clone() becomes <receiver>.clone()
+                format!("{receiver}.clone()")
+            }
+            UnificationPattern::DictCopyPattern => {
+                // HashMap::clone() becomes <receiver>.clone()
+                format!("{receiver}.clone()")
+            }
+            UnificationPattern::DictSetDefaultPattern => {
+                // HashMap::entry().or_insert() becomes <receiver>.entry(key).or_insert(default)
+                format!("{receiver}.entry(key).or_insert(default)")
+            }
             UnificationPattern::Custom => format!("{callee}()"),
         }
     }

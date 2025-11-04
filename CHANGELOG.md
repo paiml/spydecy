@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Copy & SetDefault Patterns ✨
+
+**New Pattern Support** (3 new patterns):
+- ✅ **List Copy**: Python `list.copy()` + C `list_copy()` → Rust `Vec::clone()`
+- ✅ **Dict Copy**: Python `dict.copy()` + C `dict_copy()` → Rust `HashMap::clone()`
+- ✅ **Dict SetDefault**: Python `dict.setdefault()` + C `dict_setdefault()` → Rust `HashMap::entry().or_insert()`
+
+**Quality Metrics**:
+- 130 tests passing (up from 124) - 100% pass rate maintained
+- 22 patterns total (up from 19)
+- 3 new end-to-end tests (`e2e_copy_setdefault.rs`)
+- 3 new real-world validation scenarios:
+  - Defensive list copying (data backup)
+  - Dictionary state snapshots (rollback/undo)
+  - Cache with lazy initialization (default values)
+
+**Testing & Validation**:
+- Added `e2e_copy_setdefault.rs` with full pipeline tests
+- Real-world validation: `data_list.clone()`, `state_dict.clone()`, `cache.entry().or_insert()`
+- Extreme TDD methodology: RED → GREEN → REFACTOR
+- All patterns generate idiomatic Rust code
+
+**Technical Details**:
+- Pattern matching in `unified.rs`
+- Code generation in `codegen.rs` with idiomatic Rust
+- `list.copy()` generates `Vec::clone()` (deep copy semantics)
+- `dict.copy()` generates `HashMap::clone()` (shallow copy)
+- `dict.setdefault()` generates `HashMap::entry().or_insert()` (Rust entry API)
+- Generated code uses actual variable names (e.g., `data_list`, `state_dict`, `cache`)
+
 ### Added - Common Patterns: Items, Remove, Sort ✨
 
 **New Pattern Support** (3 new patterns):
