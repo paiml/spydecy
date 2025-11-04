@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Advanced Patterns: Values, Count, Index ✨
+
+**New Pattern Support** (3 new patterns):
+- ✅ **Dict Values**: Python `dict.values()` + C `PyDict_Values()` → Rust `HashMap::values()`
+- ✅ **List Count**: Python `list.count(x)` + C `list_count()` → Rust `Vec::iter().filter().count()`
+- ✅ **List Index**: Python `list.index(x)` + C `list_index()` → Rust `Vec::iter().position()`
+
+**Quality Metrics**:
+- 42 tests passing (up from 36) - 100% pass rate maintained
+- 16 patterns total (up from 13)
+- 3 new end-to-end tests (`e2e_advanced_patterns.rs`)
+- 3 new real-world validation scenarios:
+  - Configuration value extraction (dict values)
+  - Error counting in logs (list count)
+  - Waitlist position finding (list index)
+
+**Testing & Validation**:
+- Added `e2e_advanced_patterns.rs` with full pipeline tests
+- Real-world validation: `config_dict.values()`, `log_entries.iter().filter().count()`, `waitlist.iter().position()`
+- Extreme TDD methodology: RED → GREEN → REFACTOR
+
+**Technical Details**:
+- Pattern matching in `unified.rs`
+- Code generation in `codegen.rs` with iterator chains
+- `list.count()` generates `Vec::iter().filter(|&x| x == &item).count()`
+- `list.index()` generates `Vec::iter().position(|&x| x == &item)` (returns Option)
+- Generated code uses actual variable names (e.g., `config_dict`, `log_entries`, `waitlist`)
+
 ### Added - Contains Patterns ✨
 
 **New Pattern Support** (2 new patterns):

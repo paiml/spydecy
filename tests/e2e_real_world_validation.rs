@@ -296,6 +296,91 @@ static int dict_contains(PyDictObject *mp, PyObject *key) {
     println!("{}", rust_code);
 }
 
+/// Real-world scenario: Get all configuration values
+#[test]
+fn test_real_world_get_config_values() {
+    let python_source = r#"
+def get_all_config_values(config_dict):
+    return dict_values(config_dict)
+"#;
+
+    let c_source = r#"
+static PyObject* PyDict_Values(PyDictObject *mp) {
+    return NULL;
+}
+"#;
+
+    let rust_code = run_full_pipeline(python_source, c_source)
+        .expect("Should generate Rust code for dict values");
+
+    // Verify realistic output
+    assert!(
+        rust_code.contains("config_dict.values()"),
+        "Should use actual variable name 'config_dict'. Got: {}",
+        rust_code
+    );
+
+    println!("✅ Real-world dict.values() validation:");
+    println!("{}", rust_code);
+}
+
+/// Real-world scenario: Count error occurrences in logs
+#[test]
+fn test_real_world_count_errors() {
+    let python_source = r#"
+def count_error_occurrences(log_entries, error_type):
+    return count(log_entries, error_type)
+"#;
+
+    let c_source = r#"
+static Py_ssize_t list_count(PyListObject *self, PyObject *value) {
+    Py_ssize_t count = 0;
+    return count;
+}
+"#;
+
+    let rust_code = run_full_pipeline(python_source, c_source)
+        .expect("Should generate Rust code for list count");
+
+    // Verify realistic output
+    assert!(
+        rust_code.contains("log_entries") && rust_code.contains("count"),
+        "Should use actual variable name 'log_entries' and count. Got: {}",
+        rust_code
+    );
+
+    println!("✅ Real-world list.count() validation:");
+    println!("{}", rust_code);
+}
+
+/// Real-world scenario: Find index of user in waitlist
+#[test]
+fn test_real_world_find_user_position() {
+    let python_source = r#"
+def find_user_position(waitlist, user_id):
+    return index(waitlist, user_id)
+"#;
+
+    let c_source = r#"
+static Py_ssize_t list_index(PyListObject *self, PyObject *value) {
+    return 0;
+}
+"#;
+
+    let rust_code = run_full_pipeline(python_source, c_source)
+        .expect("Should generate Rust code for list index");
+
+    // Verify realistic output
+    assert!(
+        rust_code.contains("waitlist") && rust_code.contains("position"),
+        "Should use actual variable name 'waitlist' and position. Got: {}",
+        rust_code
+    );
+
+    println!("✅ Real-world list.index() validation:");
+    println!("{}", rust_code);
+}
+
 /// Validate generated code compiles
 #[test]
 fn test_generated_code_compiles() {

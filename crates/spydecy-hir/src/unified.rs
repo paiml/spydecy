@@ -246,6 +246,12 @@ pub enum UnificationPattern {
     ListContainsPattern,
     /// Python `x in dict` → C `dict_contains()` → Rust `HashMap::contains_key()`
     DictContainsPattern,
+    /// Python `dict.values()` → C `PyDict_Values()` → Rust `HashMap::values()`
+    DictValuesPattern,
+    /// Python `list.count(x)` → C `list_count()` → Rust `Vec::iter().filter().count()`
+    ListCountPattern,
+    /// Python `list.index(x)` → C `list_index()` → Rust `Vec::iter().position()`
+    ListIndexPattern,
     /// Custom pattern (extensible)
     Custom,
 }
@@ -401,6 +407,18 @@ impl Unifier {
                     if py_name == "dict_contains" && c_name == "dict_contains" {
                         // DICT CONTAINS PATTERN: Python 'x in dict' + C dict_contains() → Rust HashMap::contains_key()
                         return self.unify_dict_contains_pattern(py_args);
+                    }
+                    if py_name == "dict_values" && c_name == "PyDict_Values" {
+                        // DICT VALUES PATTERN: Python dict.values() + C PyDict_Values() → Rust HashMap::values()
+                        return self.unify_dict_values_pattern(py_args);
+                    }
+                    if py_name == "count" && c_name == "list_count" {
+                        // LIST COUNT PATTERN: Python list.count(x) + C list_count() → Rust Vec::iter().filter().count()
+                        return self.unify_list_count_pattern(py_args);
+                    }
+                    if py_name == "index" && c_name == "list_index" {
+                        // LIST INDEX PATTERN: Python list.index(x) + C list_index() → Rust Vec::iter().position()
+                        return self.unify_list_index_pattern(py_args);
                     }
                 }
 
@@ -716,6 +734,80 @@ impl Unifier {
                 python_node: None,
                 c_node: None,
                 pattern: UnificationPattern::DictContainsPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `dict.values()` pattern (Python dict.values + C `PyDict_Values` → Rust `HashMap::values`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_dict_values_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "HashMap::values".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::Custom("Values".to_owned())),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::DictValuesPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `list.count()` pattern (Python list.count + C `list_count` → Rust `Vec::iter().filter().count`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_list_count_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "Vec::count".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::Int {
+                bits: crate::types::IntSize::ISize,
+                signed: false,
+            }),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::ListCountPattern,
+                boundary_eliminated: false,
+            }),
+            meta: Metadata::new(),
+        })
+    }
+
+    /// Unify the `list.index()` pattern (Python list.index + C `list_index` → Rust `Vec::iter().position`)
+    #[allow(clippy::unnecessary_wraps)]
+    fn unify_list_index_pattern(&mut self, args: &[PythonHIR]) -> Result<UnifiedHIR> {
+        let id = self.next_node_id();
+
+        Ok(UnifiedHIR::Call {
+            id,
+            target_language: Language::Rust,
+            callee: "Vec::position".to_owned(),
+            args: self.convert_args(args),
+            inferred_type: Type::Rust(crate::types::RustType::Option(Box::new(Type::Rust(
+                crate::types::RustType::Int {
+                    bits: crate::types::IntSize::ISize,
+                    signed: false,
+                },
+            )))),
+            source_language: Language::Python,
+            cross_mapping: Some(CrossMapping {
+                python_node: None,
+                c_node: None,
+                pattern: UnificationPattern::ListIndexPattern,
                 boundary_eliminated: false,
             }),
             meta: Metadata::new(),

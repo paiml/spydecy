@@ -228,6 +228,18 @@ impl RustCodegen {
                 // HashMap::contains_key() becomes <receiver>.contains_key(&key)
                 format!("{receiver}.contains_key(&key)")
             }
+            UnificationPattern::DictValuesPattern => {
+                // HashMap::values() becomes <receiver>.values()
+                format!("{receiver}.values()")
+            }
+            UnificationPattern::ListCountPattern => {
+                // Vec::count() becomes <receiver>.iter().filter(|&x| x == &item).count()
+                format!("{receiver}.iter().filter(|&x| x == &item).count()")
+            }
+            UnificationPattern::ListIndexPattern => {
+                // Vec::position() becomes <receiver>.iter().position(|&x| x == &item)
+                format!("{receiver}.iter().position(|&x| x == &item)")
+            }
             UnificationPattern::Custom => format!("{callee}()"),
         }
     }
