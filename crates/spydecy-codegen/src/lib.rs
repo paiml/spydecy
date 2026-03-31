@@ -256,7 +256,7 @@ impl RustCodegen {
     }
 
     /// Generate a type annotation
-    #[allow(clippy::only_used_in_recursion)]
+    #[allow(clippy::only_used_in_recursion, clippy::self_only_used_in_recursion)]
     fn generate_type(&self, ty: &spydecy_hir::types::Type) -> Result<String> {
         use spydecy_hir::types::{RustType, Type};
 

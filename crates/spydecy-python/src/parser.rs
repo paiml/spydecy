@@ -48,8 +48,7 @@ pub fn parse(source: &str, filename: &str) -> Result<PythonAST> {
 /// Parse Python source using Python's ast module
 fn parse_with_python(py: Python<'_>, source: &str, filename: &str) -> Result<PythonAST> {
     // Import Python's ast module
-    let ast_module =
-        PyModule::import_bound(py, "ast").context("Failed to import Python ast module")?;
+    let ast_module = PyModule::import(py, "ast").context("Failed to import Python ast module")?;
 
     // Parse the source code
     let ast_obj = ast_module
@@ -169,7 +168,7 @@ fn extract_default_attrs(obj: &Bound<'_, PyAny>, ast: &mut PythonAST) -> Result<
 /// Extract a list of AST nodes
 fn extract_list(list: &Bound<'_, PyAny>) -> Result<Vec<PythonAST>> {
     let mut nodes = Vec::new();
-    for item in list.iter()? {
+    for item in list.try_iter()? {
         let item = item?;
         nodes.push(extract_ast_node(&item)?);
     }

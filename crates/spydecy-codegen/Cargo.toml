@@ -1,6 +1,6 @@
 [package]
 name = "spydecy-codegen"
-version = "0.3.0"
+version = "0.3.1"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -14,7 +14,7 @@ categories = ["compilers", "development-tools"]
 anyhow = "1.0"
 thiserror = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-spydecy-hir = { version = "0.3.0", path = "../spydecy-hir" }
+spydecy-hir = { version = "0.3.1", path = "../spydecy-hir" }
 
 [dev-dependencies]
 proptest = "1.5"

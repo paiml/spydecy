@@ -12,7 +12,7 @@ categories = ["compilers", "parser-implementations"]
 
 [dependencies]
 # HIR dependency
-spydecy-hir = { version = "0.3.0", path = "../spydecy-hir" }
+spydecy-hir = { version = "0.3.1", path = "../spydecy-hir" }
 
 # C parsing via clang-sys
 clang-sys = { version = "1.7", features = ["clang_3_9"] }
