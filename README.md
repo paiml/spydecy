@@ -331,3 +331,7 @@ Inspired by:
 📦 **Install now**: `cargo install spydecy`
 📖 **Documentation**: [CHANGELOG.md](CHANGELOG.md)
 🔗 **Crates.io**: https://crates.io/crates/spydecy
+
+<!-- FUNNEL-001 footer: replace spydecy with the repo name -->
+---
+📚 **Learn this hands-on:** [Pragmatic AI Labs courses on Coursera](https://www.coursera.org/partners/pragmatic-ai-labs?utm_source=github&utm_medium=readme&utm_campaign=funnel_2026q4&utm_content=spydecy) · ✉ [Free newsletter](https://ds500.paiml.com/mailing?utm_source=github&utm_medium=readme&utm_campaign=funnel_2026q4&utm_content=spydecy)
